@@ -1,4 +1,4 @@
-package com.example.kwave.domain.newstore;
+package com.example.kwave.domain.news.domain;
 
 
 import jakarta.persistence.*;
