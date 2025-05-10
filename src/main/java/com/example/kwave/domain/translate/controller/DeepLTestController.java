@@ -1,6 +1,6 @@
 package com.example.kwave.domain.translate.controller;
 
-import com.example.kwave.domain.translate.dto.request.DeepLRequestDto;
+import com.example.kwave.domain.translate.dto.request.DeepLTestRequestDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
-@RequestMapping("/api/translate")
-public class DeepLController {
+@RequestMapping("/api/test/translation")
+public class DeepLTestController {
 
     @Value("${deepl.api-key}")
     private String authKey;
@@ -24,7 +24,7 @@ public class DeepLController {
     private final String deeplApiUrl = "https://api-free.deepl.com/v2/translate";
 
     @PostMapping
-    public ResponseEntity<String> translate(@RequestBody DeepLRequestDto translationRequestDto) {
+    public ResponseEntity<String> deepLAPITest(@RequestBody DeepLTestRequestDto translationRequestDto) {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
