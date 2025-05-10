@@ -5,6 +5,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class TranslateNewsResponseDto {
+public class TranslateResponseDto {
     private List<Translation> translations;
 }

@@ -8,12 +8,10 @@ import org.springframework.data.redis.core.RedisHash;
 @Builder
 @AllArgsConstructor
 @RedisHash("TranslatedNews")
-public class TranslatedNews {
+public class TranslatedNewsTitle {
 
     @Id
-    private String translatedNewsId; // newsId:targetLangCode를 redis key로
+    private String redisKey; // newsId:targetLangCode:Title 을 redis key로
 
     private String translatedTitle;
-
-    private String translatedContent;
 }
