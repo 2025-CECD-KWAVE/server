@@ -6,5 +6,5 @@ import java.util.UUID;
 
 @Data
 public class RecommendRequestDto {
-    private UUID userID; //사용자 식별
+    private UUID userId; //사용자 식별
 }
