@@ -1,10 +1,7 @@
 package com.example.kwave.domain.user.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,6 +9,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "user")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
