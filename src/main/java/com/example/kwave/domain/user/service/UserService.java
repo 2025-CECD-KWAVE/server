@@ -3,17 +3,18 @@ package com.example.kwave.domain.user.service;
 import com.example.kwave.domain.user.domain.User;
 import com.example.kwave.domain.user.domain.repository.UserRepository;
 import com.example.kwave.domain.user.dto.request.SignupRequestDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public User createUser(SignupRequestDto signupRequestDto) {
         // 회원가입 시 선호하는 카테고리에 가중치 3 부여
@@ -23,9 +24,10 @@ public class UserService {
         }
 
         User user = new User();
+        user.setUserId(UUID.randomUUID());
         user.setUsername(signupRequestDto.getUsername());
         user.setEmail(signupRequestDto.getEmail()); // 회원가입 시 중복 X 처리 필요
-        user.setPassword(signupRequestDto.getPassword()); // 암호화 기능 필요
+        user.setPassword(bCryptPasswordEncoder.encode(signupRequestDto.getPassword())); // 암호화 기능 필요
         user.setNationality(signupRequestDto.getNationality());
         user.setLanguage(signupRequestDto.getLanguage());
         user.setPreferredCategories(userPreferredCategory);
