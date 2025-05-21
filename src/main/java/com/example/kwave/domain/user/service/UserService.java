@@ -26,7 +26,7 @@ public class UserService {
         User user = new User();
         user.setUserId(UUID.randomUUID());
         user.setUsername(signupRequestDto.getUsername());
-        user.setEmail(signupRequestDto.getEmail()); // 회원가입 시 중복 X 처리 필요
+        user.setNickname(signupRequestDto.getNickname()); // 회원가입 시 중복 X 처리 필요
         user.setPassword(bCryptPasswordEncoder.encode(signupRequestDto.getPassword())); // 암호화 기능 필요
         user.setNationality(signupRequestDto.getNationality());
         user.setLanguage(signupRequestDto.getLanguage());
