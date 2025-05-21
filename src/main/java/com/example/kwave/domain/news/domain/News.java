@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
@@ -32,15 +33,15 @@ public class News {
 
     // API의 "published_at", 뉴스가 발행된 날
     @Column(name = "published_at")
-    private LocalDateTime publishedAt;
+    private OffsetDateTime publishedAt;
 
     // API의 "enveloped_at", 뉴스가 수집된 날 (API가 뉴스를 수집한 시각)
     @Column(name = "enveloped_at")
-    private LocalDateTime envelopedAt;
+    private OffsetDateTime envelopedAt;
 
     // API의 "dateline", 언론사 기준 뉴스의 출고 시각
     @Column(name = "dateline")
-    private LocalDateTime dateline;
+    private OffsetDateTime dateline;
 
     // API의 "provider", 언론사이름 (ex: 중앙일보, 한겨레)
     private String provider;
