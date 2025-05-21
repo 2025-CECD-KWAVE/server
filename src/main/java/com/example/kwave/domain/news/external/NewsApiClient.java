@@ -1,12 +1,21 @@
 package com.example.kwave.domain.news.external;
 
 import com.example.kwave.domain.news.dto.NewsDTO;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+
+
+
 
 @Component
 @RequiredArgsConstructor
@@ -44,26 +53,44 @@ public class NewsApiClient {
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<NewsListResponseWrapper> response = restTemplate.exchange(
+        ResponseEntity<NewsRootResponse> response = restTemplate.exchange(
                 properties.getUrl(),
                 HttpMethod.POST,
                 entity,
-                NewsListResponseWrapper.class
+                NewsRootResponse.class
         );
 
-        return Optional.ofNullable(response.getBody())
-                .map(NewsListResponseWrapper::getReturn_object)
-                .map(NewsListResponse::getDocuments)
-                .orElse(Collections.emptyList());
+        try {
+            if (response.getBody() != null && response.getBody().getReturnObject() != null) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.registerModule(new JavaTimeModule());
+                objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+                NewsListResponse parsed = objectMapper.readValue(
+                        response.getBody().getReturnObject(), NewsListResponse.class);
+                List<NewsDTO> documents = parsed.getDocuments();
+                System.out.println("\uD83D\uDCC4 뉴스 개수: " + documents.size());
+                return documents;
+            } else {
+                System.out.println("❌ 응답 본문이 null 또는 returnObject가 null입니다.");
+                return Collections.emptyList();
+            }
+        } catch (Exception e) {
+            System.out.println("❌ JSON 파싱 실패: " + e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
-    @lombok.Data
-    private static class NewsListResponseWrapper {
-        private NewsListResponse return_object;
+    @Data
+    private static class NewsRootResponse {
+        @JsonProperty("returnObject")
+        private String returnObject;
     }
 
-    @lombok.Data
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static class NewsListResponse {
         private List<NewsDTO> documents;
     }
 }
+

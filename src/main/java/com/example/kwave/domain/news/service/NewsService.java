@@ -27,7 +27,6 @@ public class NewsService {
         for (NewsDTO dto : newsList) {
             System.out.println("받은 뉴스 ID: " + dto.getNewsId());
             if (!newsRepository.existsById(dto.getNewsId())) {
-                System.out.println("저장 시도: " + dto.getTitle());
                 newsRepository.save(dto.toEntity());
             } else {
                 System.out.println("이미 존재하는 뉴스: " + dto.getNewsId());

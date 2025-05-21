@@ -42,7 +42,8 @@ public class NewsController {
             LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
             String from = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             String until = today.plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            newsService.fetchAndSaveAll(from, until);return ResponseEntity.ok("테스트: " + today + " 날짜 뉴스 수동 저장 완료");
+            newsService.fetchAndSaveAll(from, until);
+            return ResponseEntity.ok("테스트: " + today + " 날짜 뉴스 수동 저장 완료");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("테스트 실패: " + e.getMessage());
