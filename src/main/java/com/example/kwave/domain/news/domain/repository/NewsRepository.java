@@ -12,6 +12,8 @@ import java.util.Optional;
 @Repository
 public interface NewsRepository extends JpaRepository<News, String> {
 
+    boolean existsByNewsId(String newsId); // 중복 체크용
+
     @Query("SELECT n FROM News n JOIN n.category c WHERE c = :category ORDER BY n.publishedAt DESC")
     List<News> fetchLatestByCategory(String category, Pageable pageable);
 
