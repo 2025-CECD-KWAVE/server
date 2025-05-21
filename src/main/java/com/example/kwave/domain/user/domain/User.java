@@ -3,7 +3,6 @@ package com.example.kwave.domain.user.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
