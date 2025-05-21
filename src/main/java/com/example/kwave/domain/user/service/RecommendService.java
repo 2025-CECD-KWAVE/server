@@ -28,8 +28,12 @@ public class RecommendService {
 
         // 사용자 선호 및 시청 이력 바탕 카테고리별 가중치 계산
         Map<String, Integer> categoryCount = new HashMap<>();
-        user.getPreferredCategories().forEach(cat -> categoryCount.merge(cat, 1, Integer::sum));
-        user.getViewedCategories().forEach(cat -> categoryCount.merge(cat, 1, Integer::sum));
+        user.getPreferredCategories().forEach(
+                (category, weight) -> categoryCount.merge(category, weight, Integer::sum)
+        );
+        user.getViewedCategories().forEach(
+                (category, weight) -> categoryCount.merge(category, weight, Integer::sum)
+        );
 
         // 가중치를 이용해 그룹화 <가중치, List<카테고리>>
         Map<Integer, List<String>> groupedByWeight = new HashMap<>();
