@@ -4,7 +4,7 @@ import com.example.kwave.domain.translate.service.TranslatedNewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
-@Controller("/api/translatedNews")
+@Controller("/api/translated")
 @RequiredArgsConstructor
 public class TranslatedNewsController {
 
