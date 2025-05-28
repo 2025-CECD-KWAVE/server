@@ -3,11 +3,20 @@ package com.example.kwave.domain.news.service;
 import com.example.kwave.domain.news.domain.News;
 import com.example.kwave.domain.news.domain.repository.NewsRepository;
 import com.example.kwave.domain.news.dto.NewsDTO;
+import com.example.kwave.domain.news.dto.NewsDetailDTO;
+import com.example.kwave.domain.news.dto.NewsSummaryDTO;
 import com.example.kwave.domain.news.external.NewsApiClient;
+import com.example.kwave.global.util.TimeUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,4 +42,40 @@ public class NewsService {
             }
         }
     }
+
+    public List<NewsSummaryDTO> getNewsSummaries(Pageable pageable) {
+        Page<News> page = newsRepository.findAll(pageable);
+        return page.getContent().stream().map(news -> {
+            String summary = news.getContent() != null && news.getContent().length() > 100
+                    ? news.getContent().substring(0, 100) + "..."
+                    : news.getContent();
+
+            String timeAgo = TimeUtils.getTimeAgo(
+                    news.getPublishedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+            );
+
+
+            return NewsSummaryDTO.builder()
+                    .newsId(news.getNewsId())
+                    .title(news.getTitle())
+                    .summary(summary)
+                    .timeAgo(timeAgo)
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    public NewsDetailDTO getNewsDetail(String newsId) {
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new RuntimeException("뉴스를 찾을 수 없습니다."));
+        return NewsDetailDTO.builder()
+                .newsId(news.getNewsId())
+                .title(news.getTitle())
+                .content(news.getContent())
+                .provider(news.getProvider())
+                .byline(news.getByline())
+                .publishedAt(news.getPublishedAt().toLocalDateTime())
+                .providerLinkPage(news.getProviderLinkPage())
+                .build();
+    }
+
 }

@@ -1,8 +1,15 @@
 package com.example.kwave.domain.news.controller;
 
 import com.example.kwave.domain.news.domain.News;
+import com.example.kwave.domain.news.dto.NewsDTO;
+import com.example.kwave.domain.news.dto.NewsDetailDTO;
+import com.example.kwave.domain.news.dto.NewsSummaryDTO;
 import com.example.kwave.domain.news.service.NewsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,5 +56,21 @@ public class NewsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("테스트 실패: " + e.getMessage());
         }
+    }
+
+
+    @GetMapping("/list")
+    public ResponseEntity<List<NewsSummaryDTO>> getNewsList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
+        List<NewsSummaryDTO> newsList = newsService.getNewsSummaries(pageable);
+        return ResponseEntity.ok(newsList);
+    }
+
+    @GetMapping("/{newsId}")
+    public ResponseEntity<NewsDetailDTO> getNewsDetail(@PathVariable String newsId) {
+        return ResponseEntity.ok(newsService.getNewsDetail(newsId));
     }
 }
