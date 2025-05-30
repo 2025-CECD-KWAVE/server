@@ -2,6 +2,7 @@ package com.example.kwave.domain.news.controller;
 
 import com.example.kwave.domain.news.domain.News;
 import com.example.kwave.domain.news.service.NewsService;
+import com.example.kwave.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,6 +36,12 @@ public class NewsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("뉴스 저장 실패: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/{newsId}/watch")
+    public ResponseEntity<String> watchNews(@RequestParam UUID userId, @PathVariable String newsId) {
+        newsService.userWatched(userId, newsId);
+        return ResponseEntity.ok("뉴스 시청");
     }
 
     @GetMapping("/test-scheduler")
