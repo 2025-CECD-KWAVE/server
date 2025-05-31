@@ -5,6 +5,9 @@ import com.example.kwave.domain.news.dto.NewsDTO;
 import com.example.kwave.domain.news.dto.NewsDetailDTO;
 import com.example.kwave.domain.news.dto.NewsSummaryDTO;
 import com.example.kwave.domain.news.service.NewsService;
+import com.example.kwave.domain.translate.domain.TargetLangCode;
+import com.example.kwave.domain.translate.domain.TranslatedNewsSummary;
+import com.example.kwave.domain.translate.service.TranslatedNewsService;
 import com.example.kwave.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +22,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @RestController
@@ -27,6 +31,7 @@ import java.util.UUID;
 public class NewsController {
 
     private final NewsService newsService;
+    private final TranslatedNewsService translatedNewsService;
 
     @PostMapping
     public ResponseEntity<String> saveNews(@RequestBody News news) {
@@ -70,15 +75,35 @@ public class NewsController {
     @GetMapping("/list")
     public ResponseEntity<List<NewsSummaryDTO>> getNewsList(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            Locale locale) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
         List<NewsSummaryDTO> newsList = newsService.getNewsSummaries(pageable);
-        return ResponseEntity.ok(newsList);
+
+        TargetLangCode targetLangCode = translatedNewsService.convertLocaleToTargetLangCode(locale);
+
+        if (targetLangCode == TargetLangCode.KO) {
+            return ResponseEntity.ok(newsList);
+        }
+        else {
+              return ResponseEntity.ok(translatedNewsService.getOrTranslateSummary(newsList, targetLangCode));
+        }
+
     }
 
     @GetMapping("/{newsId}")
-    public ResponseEntity<NewsDetailDTO> getNewsDetail(@PathVariable String newsId) {
-        return ResponseEntity.ok(newsService.getNewsDetail(newsId));
+    public ResponseEntity<NewsDetailDTO> getNewsDetail(@PathVariable String newsId, Locale locale) {
+
+        TargetLangCode targetLangCode = translatedNewsService.convertLocaleToTargetLangCode(locale);
+
+        NewsDetailDTO newsDetailDTO = newsService.getNewsDetail(newsId);
+
+        if (targetLangCode == TargetLangCode.KO) {
+            return ResponseEntity.ok(newsDetailDTO);
+        }
+        else {
+            return ResponseEntity.ok(translatedNewsService.getOrTranslateDetail(newsDetailDTO, targetLangCode));
+        }
     }
 }
