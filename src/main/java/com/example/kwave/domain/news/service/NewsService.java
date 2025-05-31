@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.UUID;
 
@@ -59,6 +60,7 @@ public class NewsService {
             String timeAgo = TimeUtils.getTimeAgo(
                     news.getPublishedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
             );
+
 
 
             return NewsSummaryDTO.builder()
