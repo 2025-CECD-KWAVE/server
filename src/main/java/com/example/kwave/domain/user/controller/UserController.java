@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;
 
@@ -27,10 +27,4 @@ public class UserController {
         return ResponseEntity.ok("회원가입 완료");
     }
 
-    @PostMapping("/{userId}/view")
-    public ResponseEntity<String> updateView(@PathVariable UUID userId,
-                                             @RequestBody List<String> categories) {
-        userService.updateViewedCategories(userId, categories);
-        return ResponseEntity.ok("시청 이력 업데이트");
-    }
 }

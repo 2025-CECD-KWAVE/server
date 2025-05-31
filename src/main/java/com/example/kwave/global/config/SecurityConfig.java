@@ -54,6 +54,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login", "/", "/join").permitAll()
+                        .requestMatchers("/api/recommend").authenticated()
                         .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated());
 

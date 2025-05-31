@@ -3,7 +3,6 @@ package com.example.kwave.domain.user.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,11 +18,13 @@ public class User {
     @Column(name = "user_id", nullable = false, unique = true)
     private UUID userId;
 
-    @Column(name = "user_name", nullable = false)
+    // 로그인 시 이용하는 아이디 (클라이언트에서 email 적으라고 할 수도)
+    @Column(name = "user_name", nullable = false, unique = true)
     private String username;
 
-    @Column(name = "user_email", nullable = false, unique = true)
-    private String email;
+    // 프로그램 사용 시 사용하는 닉네임
+    @Column(name = "nickname", nullable = false, unique = true)
+    private String nickname;
 
     @Column(name = "user_passwd", nullable = false)
     private String password;
