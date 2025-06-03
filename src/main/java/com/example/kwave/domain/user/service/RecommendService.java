@@ -2,15 +2,19 @@ package com.example.kwave.domain.user.service;
 
 import com.example.kwave.domain.news.domain.News;
 import com.example.kwave.domain.news.domain.repository.NewsRepository;
+import com.example.kwave.domain.news.dto.NewsSummaryDTO;
 import com.example.kwave.domain.user.domain.User;
 import com.example.kwave.domain.user.domain.repository.UserRepository;
 import com.example.kwave.domain.user.dto.request.RecommendRequestDto;
 import com.example.kwave.domain.user.dto.response.RecommendResponseDto;
+import com.example.kwave.global.util.TimeUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RecommendService {
@@ -78,13 +82,28 @@ public class RecommendService {
         recommendFromCategories(remaining, 2, usedNewsIds, recommended);
 
         // 최대 10개까지만 추출
-        List<String> newsIds = recommended.stream()
-                .map(News::getNewsId)
+        List<NewsSummaryDTO> summaries = recommended.stream()
                 .limit(10)
-                .toList();
+                .map(news -> {
+                    String summary = news.getContent() != null && news.getContent().length() > 100
+                            ? news.getContent().substring(0, 100) + "..."
+                            : news.getContent();
+
+                    String timeAgo = TimeUtils.getTimeAgo(
+                            news.getPublishedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+                    );
+
+                    return NewsSummaryDTO.builder()
+                            .newsId(news.getNewsId())
+                            .title(news.getTitle())
+                            .summary(summary)
+                            .timeAgo(timeAgo)
+                            .build();
+                })
+                .collect(Collectors.toList());
 
         RecommendResponseDto dto = new RecommendResponseDto();
-        dto.setRecommendedNewsIds(newsIds);
+        dto.setRecommendedNews(summaries);
         return dto;
     }
 
