@@ -1,11 +1,16 @@
 package com.example.kwave.domain.user.dto.response;
 
-import lombok.Data;
+import com.example.kwave.domain.news.dto.NewsSummaryDTO;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Builder
 public class RecommendResponseDto {
-    //추천 결과 뉴스 ID 반환
-    private List<String> recommendedNewsIds;
+    //추천 결과 News Summary 반환
+    private List<NewsSummaryDTO> recommendedNews;
 }
