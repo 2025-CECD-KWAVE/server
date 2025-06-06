@@ -54,7 +54,7 @@ public class NewsController {
     @PostMapping("/{newsId}/watch")
     public ResponseEntity<String> watchNews(@RequestParam UUID userId, @PathVariable String newsId) {
         newsService.userWatched(userId, newsId);
-        return ResponseEntity.ok("뉴스 시청");
+        return ResponseEntity.ok("열람한 뉴스 카테고리 업데이트");
     }
 
     @GetMapping("/test-scheduler")
