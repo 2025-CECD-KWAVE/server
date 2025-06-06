@@ -10,6 +10,7 @@ import com.example.kwave.domain.translate.domain.TranslatedNewsSummary;
 import com.example.kwave.domain.translate.domain.repository.TranslatedNewsDetailRepository;
 import com.example.kwave.domain.translate.domain.repository.TranslatedNewsSummaryRepository;
 import com.example.kwave.domain.translate.dto.response.TranslateResponseDto;
+import com.example.kwave.domain.translate.dto.response.Translation;
 import com.example.kwave.global.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,38 +42,51 @@ public class TranslatedNewsService {
     private final NewsRepository newsRepository;
 
     public List<NewsSummaryDTO> getOrTranslateSummary(List<NewsSummaryDTO> newsSummaryDTOList, TargetLangCode targetLangCode) {
-
         List<NewsSummaryDTO> translatedNewsSummaryList = new ArrayList<>();
-        for(NewsSummaryDTO newsSummaryDTO : newsSummaryDTOList) {
-            String newsId = newsSummaryDTO.getNewsId();
-            String redisKey = newsId + ":" + targetLangCode + ":Summary"; // newsId:targetLang:Summary을 key로 검색
-            Optional<TranslatedNewsSummary> cachedTranslatedNewsSummary = translatedNewsSummaryRepository.findById(redisKey);
-            if (cachedTranslatedNewsSummary.isPresent()) {
-                translatedNewsSummaryList.add(cachedTranslatedNewsSummary.get().toNewsSummaryDto());
-                continue;
+        List<NewsSummaryDTO> itemsToTranslate = new ArrayList<>();
+        List<String> textsToTranslate = new ArrayList<>();
+
+        // 1. 캐시 확인 및 번역 필요한 항목 모으기
+        for (NewsSummaryDTO dto : newsSummaryDTOList) {
+            String redisKey = dto.getNewsId() + ":" + targetLangCode + ":Summary";
+            Optional<TranslatedNewsSummary> cached = translatedNewsSummaryRepository.findById(redisKey);
+
+            if (cached.isPresent()) {
+                translatedNewsSummaryList.add(cached.get().toNewsSummaryDto());
+            } else {
+                // 번역 대상 텍스트 누적
+                textsToTranslate.add(dto.getTitle());
+                textsToTranslate.add(dto.getSummary());
+                textsToTranslate.add(dto.getTimeAgo());
+                itemsToTranslate.add(dto);
             }
+        }
 
-            List<String> summary = new ArrayList<>();
+        // 2. 한 번만 DeepL API 호출
+        if (!textsToTranslate.isEmpty()) {
+            TranslateResponseDto response = translate(textsToTranslate, targetLangCode);
+            List<Translation> translations = response.getTranslations();
 
-            summary.add(newsSummaryDTO.getTitle()); // 목록 조회에서 추가로 보여줄 정보에 따라서, List에 담아서 확장 가능
-            summary.add(newsSummaryDTO.getSummary());
-            summary.add(newsSummaryDTO.getTimeAgo());
+            // 3. 결과를 3줄 단위로 끊어서 각각 뉴스에 매핑
+            for (int i = 0; i < itemsToTranslate.size(); i++) {
+                int baseIdx = i * 3;
 
-            TranslateResponseDto translateResponseDto = translate(summary, targetLangCode);
+                NewsSummaryDTO original = itemsToTranslate.get(i);
+                String redisKey = original.getNewsId() + ":" + targetLangCode + ":Summary";
 
-            TranslatedNewsSummary translatedNewsSummary = TranslatedNewsSummary.builder()
-                    .redisKey(redisKey)
-                    .translatedTitle(translateResponseDto.getTranslations().get(0).getText())
-                    .translatedSummary(translateResponseDto.getTranslations().get(1).getText())
-                    .timeAgo(translateResponseDto.getTranslations().get(2).getText())
-                    .build();
+                TranslatedNewsSummary translated = TranslatedNewsSummary.builder()
+                        .redisKey(redisKey)
+                        .translatedTitle(translations.get(baseIdx).getText())
+                        .translatedSummary(translations.get(baseIdx + 1).getText())
+                        .timeAgo(translations.get(baseIdx + 2).getText())
+                        .build();
 
-            translatedNewsSummaryRepository.save(translatedNewsSummary);
-            translatedNewsSummaryList.add(translatedNewsSummary.toNewsSummaryDto());
+                translatedNewsSummaryRepository.save(translated);
+                translatedNewsSummaryList.add(translated.toNewsSummaryDto());
+            }
         }
 
         return translatedNewsSummaryList;
-
     }
 
     public NewsDetailDTO getOrTranslateDetail(NewsDetailDTO newsDetailDTO, TargetLangCode targetLangCode) {
