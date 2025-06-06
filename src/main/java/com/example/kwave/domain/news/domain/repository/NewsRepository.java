@@ -21,7 +21,7 @@ public interface NewsRepository extends JpaRepository<News, String> {
 
     Optional<News> findByNewsId(String newsId);
 
-    @Query("SELECT DISTINCT n FROM News n JOIN n.category c WHERE c IN :categories ORDER BY n.publishedAt DESC")
+    @Query("SELECT DISTINCT n FROM News n JOIN n.category c WHERE c IN :categories")
     List<News> fetchLatestByCategories(@Param("categories") List<String> categories, Pageable pageable);
 
 

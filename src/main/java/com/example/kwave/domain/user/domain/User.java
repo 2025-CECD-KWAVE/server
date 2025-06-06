@@ -52,4 +52,12 @@ public class User {
     @MapKeyColumn(name = "category")
     @Column(name = "weight")
     private Map<String, Integer> viewedCategories;
+
+    // 사용자가 추천된 뉴스 리스트에서 클릭을 했는가?
+    // true일 경우 추천 뉴스 리스트 내에서 클릭, false일 경우 추천 외 다른 경로 클릭
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_click_summary", joinColumns = @JoinColumn(name = "user_id"))
+    @MapKeyColumn(name = "is_recommend")  // true or false
+    @Column(name = "click_count")
+    private Map<Boolean, Integer> clickSummary;
 }

@@ -54,7 +54,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login", "/", "/join").permitAll()
-                        .requestMatchers("/api/recommend").authenticated()
+                        .requestMatchers("/api/recommend", "/api/users/click-log").authenticated()
                         .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated());
 
