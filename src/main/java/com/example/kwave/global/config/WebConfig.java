@@ -12,6 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:5173", "http://13.125.226.149")
                 .allowedMethods("GET", "POST", "OPTIONS")
+                .exposedHeaders("Authorization")
                 .allowCredentials(true);  // 쿠키 포함 허용 시
     }
 }
