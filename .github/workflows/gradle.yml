@@ -40,10 +40,10 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build Docker image
-      run: docker build -t your-dockerhub-id/your-image-name:latest .
+      run: docker build -t gzhan0226/kwave:latest .
 
     - name: Push Docker image
-      run: docker push your-dockerhub-id/your-image-name:latest
+      run: docker push gzhan0226/kwave:latest
 
     - name: SSH into server and deploy
       uses: appleboy/ssh-action@v1.0.0
@@ -52,10 +52,10 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
-          docker pull your-dockerhub-id/your-image-name:latest
+          docker pull gzhan0226/kwave:latest
           docker stop spring-container || true
           docker rm spring-container || true
-          docker run -d --name spring-container -p 8080:8080 your-dockerhub-id/your-image-name:latest
+          docker run -d --name spring-container -p 8080:8080 gzhan0226/kwave:latest
 
   dependency-submission:
 
