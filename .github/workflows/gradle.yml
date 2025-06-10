@@ -56,7 +56,8 @@ jobs:
           docker rm spring-container || true
           docker run -d --name spring-container -p 8080:8080 \
             -v /home/${{ secrets.SERVER_USER }}/app-config/application.yml:/app/application.yml \
-            gzhan0226/kwave:latest
+            gzhan0226/kwave:latest \
+            --spring.config.location=file:/app/application.yml
 
   dependency-submission:
     runs-on: ubuntu-latest
