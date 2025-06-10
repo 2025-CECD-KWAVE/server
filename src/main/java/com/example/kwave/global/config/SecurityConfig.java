@@ -43,6 +43,7 @@ public class SecurityConfig {
 
 
         http
+                .cors(Customizer.withDefaults())
                 .csrf((auth) -> auth.disable());
 
         http
