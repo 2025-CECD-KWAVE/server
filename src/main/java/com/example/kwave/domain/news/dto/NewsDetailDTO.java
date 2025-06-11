@@ -3,6 +3,7 @@ package com.example.kwave.domain.news.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,4 +18,6 @@ public class NewsDetailDTO {
     private String byline;
     private LocalDateTime publishedAt;
     private String providerLinkPage;
+    private List<String> imageUrls;
+
 }

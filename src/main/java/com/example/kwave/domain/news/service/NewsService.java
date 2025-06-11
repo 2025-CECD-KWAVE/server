@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.UUID;
 
@@ -43,6 +42,9 @@ public class NewsService {
         for (NewsDTO dto : newsList) {
             System.out.println("받은 뉴스 ID: " + dto.getNewsId());
             if (!newsRepository.existsById(dto.getNewsId())) {
+                if (!dto.isCultureGeneralOrEntertainmentNews()) {
+                    continue; // 문화>문화일반, 문화>방송_연예가 아니면 저장x
+                }
                 newsRepository.save(dto.toEntity());
             } else {
                 System.out.println("이미 존재하는 뉴스: " + dto.getNewsId());
@@ -61,13 +63,16 @@ public class NewsService {
                     news.getPublishedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
             );
 
-
+            String thumbnailUrl = (news.getImageUrls() != null && !news.getImageUrls().isEmpty())
+                    ? news.getImageUrls().get(0)
+                    : null;
 
             return NewsSummaryDTO.builder()
                     .newsId(news.getNewsId())
                     .title(news.getTitle())
                     .summary(summary)
                     .timeAgo(timeAgo)
+                    .thumbnailUrl(thumbnailUrl) // ✅
                     .build();
         }).collect(Collectors.toList());
     }
@@ -83,6 +88,7 @@ public class NewsService {
                 .byline(news.getByline())
                 .publishedAt(news.getPublishedAt().toLocalDateTime())
                 .providerLinkPage(news.getProviderLinkPage())
+                .imageUrls(news.getImageUrls())
                 .build();
     }
     public void userWatched(UUID userId, String newsId) {

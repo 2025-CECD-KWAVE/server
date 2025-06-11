@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.example.kwave.domain.news.domain.News;
@@ -61,6 +63,9 @@ public class NewsDTO {
     @JsonProperty("hilight")
     private String hilight;
 
+    @JsonProperty("images")
+    private String imagePaths;  // \n 포함된 여러 경로 문자열
+
     public News toEntity() {
         return News.builder()
                 .newsId(this.newsId)
@@ -74,7 +79,21 @@ public class NewsDTO {
                 .providerLinkPage(this.providerLinkPage)
                 .category(this.category)
                 .categoryIncident(this.categoryIncident)
+                .imageUrls(this.extractImageUrls())
                 .build();
+    }
+    public List<String> extractImageUrls() {
+        if (imagePaths == null || imagePaths.isBlank()) return Collections.emptyList();
+
+        return Arrays.stream(imagePaths.split("\\n"))
+                .filter(s -> !s.isBlank())
+                .map(path -> path.startsWith("http") ? path : "https://www.bigkinds.or.kr/resources/images" + path)
+                .toList();
+    }
+
+    public boolean isCultureGeneralOrEntertainmentNews() {
+        if (this.category == null) return false;
+        return category.contains("문화>문화일반") || category.contains("문화>방송_연예");
     }
 }
 
