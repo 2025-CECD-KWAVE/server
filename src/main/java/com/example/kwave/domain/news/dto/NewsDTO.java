@@ -90,5 +90,10 @@ public class NewsDTO {
                 .map(path -> path.startsWith("http") ? path : "https://www.bigkinds.or.kr/resources/images" + path)
                 .toList();
     }
+
+    public boolean isCultureGeneralOrEntertainmentNews() {
+        if (this.category == null) return false;
+        return category.contains("문화>문화일반") || category.contains("문화>방송_연예");
+    }
 }
 
