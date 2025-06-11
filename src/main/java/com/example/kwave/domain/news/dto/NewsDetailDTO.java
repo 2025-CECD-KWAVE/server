@@ -19,4 +19,5 @@ public class NewsDetailDTO {
     private LocalDateTime publishedAt;
     private String providerLinkPage;
     private List<String> imageUrls;
+
 }

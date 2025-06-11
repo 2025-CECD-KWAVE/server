@@ -13,4 +13,5 @@ public class NewsSummaryDTO {
     private String summary;
     private String timeAgo; // 예: "5분 전", "3시간 전"
     private String thumbnailUrl;
+
 }

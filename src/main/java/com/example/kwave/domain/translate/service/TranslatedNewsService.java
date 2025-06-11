@@ -2,12 +2,15 @@ package com.example.kwave.domain.translate.service;
 
 import com.example.kwave.domain.news.domain.News;
 import com.example.kwave.domain.news.domain.repository.NewsRepository;
+import com.example.kwave.domain.news.dto.NewsDetailDTO;
+import com.example.kwave.domain.news.dto.NewsSummaryDTO;
 import com.example.kwave.domain.translate.domain.TargetLangCode;
-import com.example.kwave.domain.translate.domain.TranslatedNewsContent;
-import com.example.kwave.domain.translate.domain.TranslatedNewsTitle;
-import com.example.kwave.domain.translate.domain.repository.TranslatedNewsContentRepository;
-import com.example.kwave.domain.translate.domain.repository.TranslatedNewsTitleRepository;
+import com.example.kwave.domain.translate.domain.TranslatedNewsDetail;
+import com.example.kwave.domain.translate.domain.TranslatedNewsSummary;
+import com.example.kwave.domain.translate.domain.repository.TranslatedNewsDetailRepository;
+import com.example.kwave.domain.translate.domain.repository.TranslatedNewsSummaryRepository;
 import com.example.kwave.domain.translate.dto.response.TranslateResponseDto;
+import com.example.kwave.domain.translate.dto.response.Translation;
 import com.example.kwave.global.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +22,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -32,63 +37,90 @@ public class TranslatedNewsService {
 
     private final String deeplApiUrl = "https://api-free.deepl.com/v2/translate";
 
-    private final TranslatedNewsTitleRepository translatedNewsTitleRepository;
-    private final TranslatedNewsContentRepository translatedNewsContentRepository;
+    private final TranslatedNewsSummaryRepository translatedNewsSummaryRepository;
+    private final TranslatedNewsDetailRepository translatedNewsDetailRepository;
     private final NewsRepository newsRepository;
 
-    public TranslatedNewsTitle getOrTranslateTitle(String newsId, TargetLangCode targetLangCode) {
+    public List<NewsSummaryDTO> getOrTranslateSummary(List<NewsSummaryDTO> newsSummaryDTOList, TargetLangCode targetLangCode) {
+        List<NewsSummaryDTO> translatedNewsSummaryList = new ArrayList<>();
+        List<NewsSummaryDTO> itemsToTranslate = new ArrayList<>();
+        List<String> textsToTranslate = new ArrayList<>();
 
-        String redisKey = newsId + ":" + targetLangCode + ":Title"; // newsId:targetLang:Title을 key로 검색
-        Optional<TranslatedNewsTitle> cachedTranslatedNewsTitle = translatedNewsTitleRepository.findById(redisKey);
-        if (cachedTranslatedNewsTitle.isPresent()) {
-            return cachedTranslatedNewsTitle.get();
+        // 1. 캐시 확인 및 번역 필요한 항목 모으기
+        for (NewsSummaryDTO dto : newsSummaryDTOList) {
+            String redisKey = dto.getNewsId() + ":" + targetLangCode + ":Summary";
+            Optional<TranslatedNewsSummary> cached = translatedNewsSummaryRepository.findById(redisKey);
+
+            if (cached.isPresent()) {
+                translatedNewsSummaryList.add(cached.get().toNewsSummaryDto());
+            } else {
+                // 번역 대상 텍스트 누적
+                textsToTranslate.add(dto.getTitle());
+                textsToTranslate.add(dto.getSummary());
+                textsToTranslate.add(dto.getTimeAgo());
+                itemsToTranslate.add(dto);
+            }
         }
 
-        News news = newsRepository.findById(newsId)
-                .orElseThrow(()-> new NotFoundException("해당 뉴스가 없습니다"));
+        // 2. 한 번만 DeepL API 호출
+        if (!textsToTranslate.isEmpty()) {
+            TranslateResponseDto response = translate(textsToTranslate, targetLangCode);
+            List<Translation> translations = response.getTranslations();
 
-        List<String> title = new ArrayList<>();
+            // 3. 결과를 3줄 단위로 끊어서 각각 뉴스에 매핑
+            for (int i = 0; i < itemsToTranslate.size(); i++) {
+                int baseIdx = i * 3;
 
-        title.add(news.getTitle()); // 목록 조회에서 추가로 보여줄 정보에 따라서, List에 담아서 확장 가능
+                NewsSummaryDTO original = itemsToTranslate.get(i);
+                String redisKey = original.getNewsId() + ":" + targetLangCode + ":Summary";
 
-        TranslateResponseDto translateResponseDto = translate(title, targetLangCode);
+                TranslatedNewsSummary translated = TranslatedNewsSummary.builder()
+                        .redisKey(redisKey)
+                        .translatedTitle(translations.get(baseIdx).getText())
+                        .translatedSummary(translations.get(baseIdx + 1).getText())
+                        .timeAgo(translations.get(baseIdx + 2).getText())
+                        .build();
 
-        TranslatedNewsTitle translatedNewsTitle = TranslatedNewsTitle.builder()
-                .redisKey(redisKey)
-                .translatedTitle(translateResponseDto.getTranslations().get(0).getText())
-                .build();
+                translatedNewsSummaryRepository.save(translated);
+                translatedNewsSummaryList.add(translated.toNewsSummaryDto());
+            }
+        }
 
-        translatedNewsTitleRepository.save(translatedNewsTitle);
-
-        return translatedNewsTitle;
-
+        return translatedNewsSummaryList;
     }
 
-    public TranslatedNewsContent getOrTranslateContent(String newsId, TargetLangCode targetLangCode) {
+    public NewsDetailDTO getOrTranslateDetail(NewsDetailDTO newsDetailDTO, TargetLangCode targetLangCode) {
 
-        String redisKey = newsId + ":" + targetLangCode + ":Content"; // newsId:targetLang:Content을 key로 검색
-        Optional<TranslatedNewsContent> cachedTranslatedNewsContent = translatedNewsContentRepository.findById(redisKey);
+        String newsId = newsDetailDTO.getNewsId();
+        String redisKey = newsId + ":" + targetLangCode + ":Detail"; // newsId:targetLang:Detail을 key로 검색
+        Optional<TranslatedNewsDetail> cachedTranslatedNewsContent = translatedNewsDetailRepository.findById(redisKey);
         if (cachedTranslatedNewsContent.isPresent()) {
-            return cachedTranslatedNewsContent.get();
+            return cachedTranslatedNewsContent.get().toNewsDetailDto();
         }
 
-        News news = newsRepository.findById(newsId)
-                .orElseThrow(()-> new NotFoundException("해당 뉴스가 없습니다"));
+        List<String> detail = new ArrayList<>();
 
-        List<String> content = new ArrayList<>();
+        detail.add(newsDetailDTO.getTitle());
+        detail.add(newsDetailDTO.getContent());
+        detail.add(newsDetailDTO.getProvider());
+        detail.add(newsDetailDTO.getByline());
 
-        content.add(news.getContent());
 
-        TranslateResponseDto translateResponseDto = translate(content, targetLangCode);
+        TranslateResponseDto translateResponseDto = translate(detail, targetLangCode);
 
-        TranslatedNewsContent translatedNewsContent = TranslatedNewsContent.builder()
+        TranslatedNewsDetail translatedNewsDetail = TranslatedNewsDetail.builder()
                 .redisKey(redisKey)
-                .translatedContent(translateResponseDto.getTranslations().get(0).getText())
+                .translatedTitle(translateResponseDto.getTranslations().get(0).getText())
+                .translatedContent(translateResponseDto.getTranslations().get(1).getText())
+                .translatedProvider(translateResponseDto.getTranslations().get(2).getText())
+                .translatedByline(translateResponseDto.getTranslations().get(3).getText())
+                .publishedAt(newsDetailDTO.getPublishedAt())
+                .providerLinkPage(newsDetailDTO.getProviderLinkPage())
                 .build();
 
-        translatedNewsContentRepository.save(translatedNewsContent);
+        translatedNewsDetailRepository.save(translatedNewsDetail);
 
-        return translatedNewsContent;
+        return translatedNewsDetail.toNewsDetailDto();
     }
 
     public TranslateResponseDto translate(List<String> translateLines, TargetLangCode targetLangCode) {
@@ -102,10 +134,15 @@ public class TranslatedNewsService {
         for (String translateLine : translateLines ) { // 확장성을 고려해, List로 받음
             params.add("text", translateLine);
         }
-        params.add("target_lang", targetLangCode.toString());
+        params.add("target_lang", targetLangCode.getStringCode());
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
 
         return  restTemplate.postForObject(deeplApiUrl, entity, TranslateResponseDto.class);
+    }
+
+    public TargetLangCode convertLocaleToTargetLangCode (Locale locale) {
+        return TargetLangCode.convertLocale(locale)
+                .orElse(TargetLangCode.KO); // 없으면 한국어로
     }
 }

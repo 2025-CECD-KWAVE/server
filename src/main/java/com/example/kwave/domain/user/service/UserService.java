@@ -2,6 +2,7 @@ package com.example.kwave.domain.user.service;
 
 import com.example.kwave.domain.user.domain.User;
 import com.example.kwave.domain.user.domain.repository.UserRepository;
+import com.example.kwave.domain.user.dto.request.ClickLogRequestDto;
 import com.example.kwave.domain.user.dto.request.SignupRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -50,4 +51,21 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void updateClickLog (UUID userId, ClickLogRequestDto clickLogRequestDto){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Map<Boolean, Integer> clickLogSummary = user.getClickSummary();
+
+        if(clickLogSummary == null){
+            clickLogSummary = new HashMap<>();
+        }
+
+        boolean isFromRecommend = clickLogRequestDto.isFromRecommend();
+
+        clickLogSummary.put(isFromRecommend, clickLogSummary.getOrDefault(isFromRecommend, 0) + 1);
+
+        user.setClickSummary(clickLogSummary);
+        userRepository.save(user);
+    }
 }

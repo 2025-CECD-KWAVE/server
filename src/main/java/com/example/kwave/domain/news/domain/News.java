@@ -82,4 +82,5 @@ public class News {
     @Column(name = "image_url")
     private List<String> imageUrls;
     // 이러한 category와 category_incident는 뉴스토어에서 정제해서 우리에게 제공하는 데이터 형식임.
+
 }
