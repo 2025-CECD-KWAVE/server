@@ -52,7 +52,7 @@ public class TranslatedNewsService {
             Optional<TranslatedNewsSummary> cached = translatedNewsSummaryRepository.findById(redisKey);
 
             if (cached.isPresent()) {
-                translatedNewsSummaryList.add(cached.get().toNewsSummaryDto());
+                translatedNewsSummaryList.add(cached.get().toNewsSummaryDto(dto.getThumbnailUrl()));
             } else {
                 // 번역 대상 텍스트 누적
                 textsToTranslate.add(dto.getTitle());
@@ -82,7 +82,7 @@ public class TranslatedNewsService {
                         .build();
 
                 translatedNewsSummaryRepository.save(translated);
-                translatedNewsSummaryList.add(translated.toNewsSummaryDto());
+                translatedNewsSummaryList.add(translated.toNewsSummaryDto(original.getThumbnailUrl()));
             }
         }
 
@@ -95,7 +95,7 @@ public class TranslatedNewsService {
         String redisKey = newsId + ":" + targetLangCode + ":Detail"; // newsId:targetLang:Detail을 key로 검색
         Optional<TranslatedNewsDetail> cachedTranslatedNewsContent = translatedNewsDetailRepository.findById(redisKey);
         if (cachedTranslatedNewsContent.isPresent()) {
-            return cachedTranslatedNewsContent.get().toNewsDetailDto();
+            return cachedTranslatedNewsContent.get().toNewsDetailDto(newsDetailDTO.getImageUrls());
         }
 
         List<String> detail = new ArrayList<>();
@@ -120,7 +120,7 @@ public class TranslatedNewsService {
 
         translatedNewsDetailRepository.save(translatedNewsDetail);
 
-        return translatedNewsDetail.toNewsDetailDto();
+        return translatedNewsDetail.toNewsDetailDto(newsDetailDTO.getImageUrls());
     }
 
     public TranslateResponseDto translate(List<String> translateLines, TargetLangCode targetLangCode) {
