@@ -7,6 +7,9 @@ import com.example.kwave.domain.news.dto.NewsDetailDTO;
 import com.example.kwave.domain.news.dto.NewsSummaryDTO;
 import com.example.kwave.domain.news.external.NewsApiClient;
 import com.example.kwave.global.util.TimeUtils;
+import com.example.kwave.domain.user.domain.User;
+import com.example.kwave.domain.user.service.UserService;
+import com.example.kwave.domain.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,8 @@ public class NewsService {
 
     private final NewsApiClient newsApiClient;
     private final NewsRepository newsRepository;
+    private final UserService userService;
+    private final UserRepository userRepository;
 
     public void saveNewsIfNotExists(News news) {
         if (!newsRepository.existsByNewsId(news.getNewsId())) {
@@ -85,5 +91,15 @@ public class NewsService {
                 .imageUrls(news.getImageUrls())
                 .build();
     }
+    public void userWatched(UUID userId, String newsId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new RuntimeException("News not found"));
+
+        List<String> categories = news.getCategory();
+
+        userService.updateViewedCategories(userId, categories);
+    }
 }
