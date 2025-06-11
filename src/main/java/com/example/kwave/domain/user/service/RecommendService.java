@@ -92,12 +92,15 @@ public class RecommendService {
                     String timeAgo = TimeUtils.getTimeAgo(
                             news.getPublishedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
                     );
+                    List<String> imageUrls = news.getImageUrls();
+                    String thumbnail = (imageUrls != null && !imageUrls.isEmpty()) ? imageUrls.get(0) : null;
 
                     return NewsSummaryDTO.builder()
                             .newsId(news.getNewsId())
                             .title(news.getTitle())
                             .summary(summary)
                             .timeAgo(timeAgo)
+                            .thumbnailUrl(thumbnail)
                             .build();
                 })
                 .collect(Collectors.toList());

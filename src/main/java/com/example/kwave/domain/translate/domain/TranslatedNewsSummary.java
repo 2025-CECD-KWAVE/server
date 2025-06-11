@@ -17,12 +17,13 @@ public class TranslatedNewsSummary {
     private String translatedSummary;
     private String timeAgo; // 예: "5분 전", "3시간 전"
 
-    public NewsSummaryDTO toNewsSummaryDto() {
+    public NewsSummaryDTO toNewsSummaryDto(String thumbnailUrl) {
         return NewsSummaryDTO.builder()
                 .newsId(redisKey.split(":")[0])
                 .title(translatedTitle)
                 .summary(translatedSummary)
                 .timeAgo(timeAgo)
+                .thumbnailUrl(thumbnailUrl)
                 .build();
     }
 }

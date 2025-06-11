@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -22,7 +23,7 @@ public class TranslatedNewsDetail {
     private LocalDateTime publishedAt;
     private String providerLinkPage;
 
-    public NewsDetailDTO toNewsDetailDto() {
+    public NewsDetailDTO toNewsDetailDto(List<String> imageUrls) {
         return NewsDetailDTO.builder()
                 .newsId(redisKey.split(":")[0])
                 .title(translatedTitle)
@@ -30,6 +31,7 @@ public class TranslatedNewsDetail {
                 .provider(translatedProvider)
                 .byline(translatedByline)
                 .publishedAt(publishedAt)
+                .imageUrls(imageUrls)
                 .providerLinkPage(providerLinkPage)
                 .build();
     }
