@@ -6,9 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import com.example.kwave.domain.news.domain.News;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -92,8 +90,14 @@ public class NewsDTO {
     }
 
     public boolean isCultureGeneralOrEntertainmentNews() {
-        if (this.category == null) return false;
-        return category.contains("문화>문화일반") || category.contains("문화>방송_연예");
+        if (this.category == null || this.category.isEmpty()) return false;
+
+        return category.stream()
+                .filter(Objects::nonNull)
+                .anyMatch(cat ->
+                        "문화>문화일반".equals(cat) ||
+                                "문화>방송_연예".equals(cat)
+                );
     }
 }
 

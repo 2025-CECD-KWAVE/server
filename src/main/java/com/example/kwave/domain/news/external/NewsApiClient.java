@@ -52,14 +52,12 @@ public class NewsApiClient {
         request.put("access_key", properties.getKey());
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
-
-        ResponseEntity<NewsRootResponse> response = restTemplate.exchange(
+        ResponseEntity<NewsRootResponse> response = restTemplate.exchange(  //여기에 문제 발생함.
                 properties.getUrl(),
                 HttpMethod.POST,
                 entity,
                 NewsRootResponse.class
         );
-
         try {
             if (response.getBody() != null && response.getBody().getReturnObject() != null) {
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -93,4 +91,3 @@ public class NewsApiClient {
         private List<NewsDTO> documents;
     }
 }
-
