@@ -54,12 +54,16 @@ public class NewsService {
                     news.getPublishedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
             );
 
+            String thumbnailUrl = (news.getImageUrls() != null && !news.getImageUrls().isEmpty())
+                    ? news.getImageUrls().get(0)
+                    : null;
 
             return NewsSummaryDTO.builder()
                     .newsId(news.getNewsId())
                     .title(news.getTitle())
                     .summary(summary)
                     .timeAgo(timeAgo)
+                    .thumbnailUrl(thumbnailUrl) // ✅
                     .build();
         }).collect(Collectors.toList());
     }
@@ -75,6 +79,7 @@ public class NewsService {
                 .byline(news.getByline())
                 .publishedAt(news.getPublishedAt().toLocalDateTime())
                 .providerLinkPage(news.getProviderLinkPage())
+                .imageUrls(news.getImageUrls())
                 .build();
     }
 

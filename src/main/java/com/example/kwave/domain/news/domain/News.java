@@ -76,5 +76,10 @@ public class News {
     @Column(name = "incident_category")
     private List<String> categoryIncident;
 
+    // 이미지의 url 주소
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "news_images", joinColumns = @JoinColumn(name = "news_id"))
+    @Column(name = "image_url")
+    private List<String> imageUrls;
     // 이러한 category와 category_incident는 뉴스토어에서 정제해서 우리에게 제공하는 데이터 형식임.
 }
