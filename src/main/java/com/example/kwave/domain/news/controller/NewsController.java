@@ -9,8 +9,6 @@ import com.example.kwave.domain.translate.domain.TargetLangCode;
 import com.example.kwave.domain.translate.domain.TranslatedNewsSummary;
 import com.example.kwave.domain.translate.service.TranslatedNewsService;
 import com.example.kwave.domain.user.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,14 +28,12 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/news")
-@Tag(name = "News", description = "뉴스 저장 API")
 public class NewsController {
 
     private final NewsService newsService;
     private final TranslatedNewsService translatedNewsService;
 
     @PostMapping
-    @Operation(summary = "개별 뉴스 저장 (테스트)", description = "개별 뉴스를 저장합니다")
     public ResponseEntity<String> saveNews(@RequestBody News news) {
         newsService.saveNewsIfNotExists(news);
         return ResponseEntity.ok("News saved (if not already exists).");
@@ -45,7 +41,6 @@ public class NewsController {
 
     // 예: http://localhost:8080/api/news/fetch/01101001.20210107151933001
     @GetMapping("/fetch-all")
-    @Operation(summary = "뉴스 API 호출 및 저장 (테스트)", description = "API를 통해 기간내의 뉴스를 저장합니다 (테스트)")
     public ResponseEntity<String> fetchAll(@RequestParam String from, @RequestParam String to) {
         try {
             newsService.fetchAndSaveAll(from, to);
@@ -57,14 +52,12 @@ public class NewsController {
     }
 
     @PostMapping("/{newsId}/watch")
-    @Operation(summary = "사용자가 열람한 뉴스 이력 저장", description = "뉴스 추천을 위해 사용자가 뉴스를 조회한 경우, 해당 뉴스 id를 저장합니다")
     public ResponseEntity<String> watchNews(@RequestParam UUID userId, @PathVariable String newsId) {
         newsService.userWatched(userId, newsId);
         return ResponseEntity.ok("열람한 뉴스 카테고리 업데이트");
     }
 
     @GetMapping("/test-scheduler")
-    @Operation(summary = "스케줄러 동작 (테스트)", description = "뉴스 저장 스케줄러를 동작시킵니다")
     public ResponseEntity<String> testScheduler() {
         try {
             LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
@@ -80,7 +73,6 @@ public class NewsController {
 
 
     @GetMapping("/list")
-    @Operation(summary = "최신 뉴스 목록 조회", description = "최신순으로 뉴스 목록을 조회합니다")
     public ResponseEntity<List<NewsSummaryDTO>> getNewsList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -101,7 +93,6 @@ public class NewsController {
     }
 
     @GetMapping("/{newsId}")
-    @Operation(summary = "상세 뉴스 조회", description = "해당 newsId 뉴스 조회")
     public ResponseEntity<NewsDetailDTO> getNewsDetail(@PathVariable String newsId, Locale locale) {
 
         TargetLangCode targetLangCode = translatedNewsService.convertLocaleToTargetLangCode(locale);
