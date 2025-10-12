@@ -34,6 +34,9 @@ public class NewsDTO {
     @JsonProperty("content")
     private String content;
 
+    @JsonProperty("summary")
+    private String summary;  // 요약 필드 추가
+
     @JsonProperty("published_at")
     private OffsetDateTime publishedAt;
 
@@ -69,6 +72,7 @@ public class NewsDTO {
                 .newsId(this.newsId)
                 .title(this.title)
                 .content(this.content)
+                .summary(this.summary)  // summary 매핑 추가
                 .publishedAt(this.publishedAt)          // ✅ toLocalDateTime() 제거
                 .envelopedAt(this.envelopedAt)          // ✅ 제거
                 .dateline(this.dateline)                // ✅ 제거

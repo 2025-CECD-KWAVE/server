@@ -53,6 +53,10 @@ public class News {
     @Column(name = "provider_link_page")
     private String providerLinkPage;
 
+    // 뉴스 원문을 요약한 요약본이 들어갈 예정
+    @Column(name = "news_summary")
+    private String summary;
+
     /*
     category라는 테이블을 여기서 만들고, newsid를 조인시켜서 관리함.
     즉 category는 	IT_과학>모바일 , [1001, 1002, 1003, 2005, 30201] 이렇게 관리됨
