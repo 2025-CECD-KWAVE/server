@@ -29,6 +29,7 @@ public class OpenAiService {
                         ChatRequest.Message.builder()
                                 .role("system")
                                 .content("당신은 뉴스 요약 전문가입니다. " +
+                                        "인물 및 고유명사, 숫자는 모두 바꾸지말고 요약해주세요. " +
                                         "핵심 인물은 빼놓지 말고 객관적이고 명확하게 요약하세요. " +
                                         "다음 뉴스 기사의 핵심 내용을 가지고 3-5문장으로 요약해주세요.")
                                 .build(),
