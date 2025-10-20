@@ -1,4 +1,4 @@
-package com.example.kwave.domain.ai.dto;
+package com.example.kwave.domain.ai.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

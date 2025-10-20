@@ -1,6 +1,9 @@
 package com.example.kwave.domain.ai.service;
 
-import com.example.kwave.domain.ai.dto.*;
+import com.example.kwave.domain.ai.dto.request.ChatRequest;
+import com.example.kwave.domain.ai.dto.request.EmbeddingRequest;
+import com.example.kwave.domain.ai.dto.response.ChatResponse;
+import com.example.kwave.domain.ai.dto.response.EmbeddingResponse;
 import com.example.kwave.global.config.OpenAiConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
