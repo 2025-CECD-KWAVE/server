@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,5 +25,5 @@ public interface NewsRepository extends JpaRepository<News, String> {
     @Query("SELECT DISTINCT n FROM News n JOIN n.category c WHERE c IN :categories")
     List<News> fetchLatestByCategories(@Param("categories") List<String> categories, Pageable pageable);
 
-
+    List<News> findBySummaryIsNullAndPublishedAtBetween(OffsetDateTime start, OffsetDateTime end);
 }
