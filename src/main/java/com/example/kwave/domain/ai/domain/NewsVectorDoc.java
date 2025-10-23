@@ -5,8 +5,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Setting;
 
-@Document(indexName = "news_vector")
+@Document(indexName = "news_vectors", createIndex = false)
+@Setting(
+    replicas = 2, shards = 1
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,6 +30,5 @@ public class NewsVectorDoc {
     @Field(type = FieldType.Text)
     private String newsSummary;
 
-    @Field(type = FieldType.Dense_Vector, dims = 1536)
     private float[] embedding;
 }
