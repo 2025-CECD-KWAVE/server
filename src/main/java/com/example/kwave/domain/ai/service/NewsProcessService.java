@@ -104,10 +104,34 @@ public class NewsProcessService {
     }
 
     /**
-     * Opensearch에서 뉴스 벡터 조회
+     * 날짜 무관 summary가 null인 모든 뉴스 처리
      */
-    public NewsVectorDoc getNewsVector(String newsId) {
-        return newsVecRepository.findByNewsId(newsId)
-                .orElseThrow(() -> new RuntimeException("벡터 데이터를 찾을 수 없습니다: " + newsId));
+    @Transactional
+    public void processAllUnprocessedNews() {
+        // summary가 null인 모든 뉴스 조회 (날짜 제약 없음)
+        List<News> unprocessedNews = newsRepository.findBySummaryIsNull();
+
+        if (unprocessedNews.isEmpty()) {
+            log.info("처리할 미처리 뉴스가 없습니다.");
+            return;
+        }
+
+        log.info("처리할 전체 미처리 뉴스 개수: {}", unprocessedNews.size());
+
+        int success = 0, fail = 0;
+
+        for (News news : unprocessedNews) {
+            try {
+                processNews(news);
+                success++;
+                log.info("처리 성공 [{} / {}]: {}", success, unprocessedNews.size(), news.getNewsId());
+            }
+            catch (Exception e) {
+                fail++;
+                log.error("처리 실패 - newsId: {}, error: {}", news.getNewsId(), e.getMessage());
+            }
+        }
+
+        log.info("전체 미처리 뉴스 배치 처리 완료 - 성공: {}, 실패: {}", success, fail);
     }
 }

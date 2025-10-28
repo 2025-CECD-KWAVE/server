@@ -81,4 +81,28 @@ public class NewsProcessController {
             );
         }
     }
+
+    /**
+     * 날짜 무관 전체 미처리 뉴스 배치 수행
+     */
+    @PostMapping("/batch/all-unprocessed")
+    public Map<String, Object> runAllUnprocessedBatch() {
+        try {
+            log.info("전체 미처리 뉴스 배치 실행 시작");
+            newsProcessService.processAllUnprocessedNews();
+
+            return Map.of(
+                    "success", true,
+                    "message", "전체 미처리 뉴스 배치 처리 완료"
+            );
+        }
+        catch (Exception e) {
+            log.error("전체 미처리 뉴스 배치 처리 실패", e);
+
+            return Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            );
+        }
+    }
 }

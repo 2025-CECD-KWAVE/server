@@ -26,4 +26,7 @@ public interface NewsRepository extends JpaRepository<News, String> {
     List<News> fetchLatestByCategories(@Param("categories") List<String> categories, Pageable pageable);
 
     List<News> findBySummaryIsNullAndPublishedAtBetween(OffsetDateTime start, OffsetDateTime end);
+
+    @Query("SELECT n FROM News n WHERE n.summary IS NULL OR n.summary = ''")
+    List<News> findBySummaryIsNull();
 }
