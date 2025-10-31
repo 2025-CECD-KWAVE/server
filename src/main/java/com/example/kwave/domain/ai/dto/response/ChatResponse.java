@@ -1,4 +1,4 @@
-package com.example.kwave.domain.ai.dto;
+package com.example.kwave.domain.ai.dto.response;
 
 import lombok.Data;
 import java.util.List;

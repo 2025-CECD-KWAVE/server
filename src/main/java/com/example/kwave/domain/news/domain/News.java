@@ -54,7 +54,8 @@ public class News {
     private String providerLinkPage;
 
     // 뉴스 원문을 요약한 요약본이 들어갈 예정
-    @Column(name = "news_summary")
+    @Lob
+    @Column(name = "news_summary", columnDefinition = "LONGTEXT")
     private String summary;
 
     /*

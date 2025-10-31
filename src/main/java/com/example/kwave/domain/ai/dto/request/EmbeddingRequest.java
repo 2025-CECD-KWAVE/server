@@ -1,4 +1,4 @@
-package com.example.kwave.domain.ai.dto;
+package com.example.kwave.domain.ai.dto.request;
 
 import lombok.Builder;
 import lombok.Data;
