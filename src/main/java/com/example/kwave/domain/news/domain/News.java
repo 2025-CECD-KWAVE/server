@@ -58,6 +58,9 @@ public class News {
     @Column(name = "news_summary", columnDefinition = "LONGTEXT")
     private String summary;
 
+    @Column(name = "view_count", nullable = false)
+    private Long viewCount = 0L;
+
     /*
     category라는 테이블을 여기서 만들고, newsid를 조인시켜서 관리함.
     즉 category는 	IT_과학>모바일 , [1001, 1002, 1003, 2005, 30201] 이렇게 관리됨
