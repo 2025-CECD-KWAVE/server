@@ -1,10 +1,14 @@
 package com.example.kwave.domain.recommend.controller;
 
+import com.example.kwave.domain.recommend.domain.NewsViewHistory;
 import com.example.kwave.domain.recommend.dto.NewsViewReqDto;
 import com.example.kwave.domain.recommend.service.NewsViewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +24,15 @@ public class NewsViewController {
     public ResponseEntity<String> recordView(@RequestBody NewsViewReqDto dto) {
         service.recordView(dto);
         return ResponseEntity.ok("뉴스 시청 이력 수집 완료");
+    }
+
+    /**
+     * 사용자가 본 뉴스 시청 이력 조회
+     */
+    @GetMapping("/view-history/{userId}")
+    public ResponseEntity<List<NewsViewHistory>> getViewHistory(@PathVariable UUID userId) {
+        List<NewsViewHistory> history = service.getViewHistory(userId);
+        return ResponseEntity.ok(history);
     }
 
     /**
