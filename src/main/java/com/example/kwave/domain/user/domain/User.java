@@ -37,6 +37,11 @@ public class User {
     @Column(name = "user_language", nullable = false)
     private String language;
 
+    // 1536차원 float[] 벡터를 byte[]로 저장하는 컬럼
+    @Lob
+    @Column(name = "preference_vector", columnDefinition = "BLOB")
+    private byte[] preferenceVector;
+
     // 회원가입 시 선택한 관심 카테고리들
     // userId | category | weight 테이블 형식
     @ElementCollection(fetch = FetchType.EAGER)
