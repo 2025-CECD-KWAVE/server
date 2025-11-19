@@ -1,6 +1,7 @@
 package com.example.kwave.domain.recommend.domain.repository;
 
 import com.example.kwave.domain.recommend.domain.NewsReaction;
+import com.example.kwave.domain.recommend.domain.ReactionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,4 +20,8 @@ public interface NewsReactionRepository extends JpaRepository<NewsReaction, Long
 
     // 특정 사용자의 모든 반응 조회
     List<NewsReaction> findByUserId(UUID userId);
+
+    List<NewsReaction> findByReactionTypeIn(List<ReactionType> types);
+
+    List<NewsReaction> findByUserIdAndReactionTypeIn(UUID userId, List<ReactionType> types);
 }
