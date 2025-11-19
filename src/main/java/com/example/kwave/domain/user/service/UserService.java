@@ -3,7 +3,10 @@ package com.example.kwave.domain.user.service;
 import com.example.kwave.domain.user.domain.User;
 import com.example.kwave.domain.user.domain.repository.UserRepository;
 import com.example.kwave.domain.user.dto.request.ClickLogRequestDto;
+import com.example.kwave.domain.user.dto.request.PreferVectorReqDto;
 import com.example.kwave.domain.user.dto.request.SignupRequestDto;
+import com.example.kwave.domain.user.dto.response.PreferVectorResDto;
+import com.example.kwave.global.util.FloatArrayConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,9 +36,36 @@ public class UserService {
         user.setLanguage(signupRequestDto.getLanguage());
         user.setPreferredCategories(userPreferredCategory);
         user.setViewedCategories(new HashMap<>()); // 시청 이력 초기화
+
+        // 초기 선호 벡터 저장
+        float[] initialVector = new float[1536];
+        user.setPreferenceVector(FloatArrayConverter.toBytes(initialVector));
         
         this.userRepository.save(user);
         return user;
+    }
+
+    // 벡터 저장
+    public void saveUserVector(PreferVectorReqDto reqDto) {
+        User user = userRepository.findById(reqDto.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // float[] → byte[] 변환 후 저장
+        user.setPreferenceVector(FloatArrayConverter.toBytes(reqDto.getVector()));
+        userRepository.save(user);
+    }
+
+    // 벡터 불러오기 (추천할 때, Redis miss 시)
+    public PreferVectorResDto getUserVector(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        float[] vector = FloatArrayConverter.toFloatArray(user.getPreferenceVector());
+
+        return PreferVectorResDto.builder()
+                .userId(userId)
+                .vector(vector)
+                .build();
     }
 
     public void updateViewedCategories(UUID userId, List<String> categories) {
