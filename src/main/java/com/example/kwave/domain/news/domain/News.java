@@ -54,8 +54,12 @@ public class News {
     private String providerLinkPage;
 
     // 뉴스 원문을 요약한 요약본이 들어갈 예정
-    @Column(name = "news_summary")
+    @Lob
+    @Column(name = "news_summary", columnDefinition = "LONGTEXT")
     private String summary;
+
+    @Column(name = "view_count", nullable = false)
+    private Long viewCount = 0L;
 
     /*
     category라는 테이블을 여기서 만들고, newsid를 조인시켜서 관리함.
