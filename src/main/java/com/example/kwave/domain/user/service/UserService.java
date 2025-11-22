@@ -19,11 +19,6 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public User createUser(SignupRequestDto signupRequestDto) {
-        // 회원가입 시 선호하는 카테고리에 가중치 3 부여
-        Map<String, Integer> userPreferredCategory = new HashMap<>();
-        for (String category : signupRequestDto.getPreferredCategories()) {
-            userPreferredCategory.put(category, 3);
-        }
 
         User user = new User();
         user.setUserId(UUID.randomUUID());
@@ -32,12 +27,8 @@ public class UserService {
         user.setPassword(bCryptPasswordEncoder.encode(signupRequestDto.getPassword()));
         user.setNationality(signupRequestDto.getNationality());
         user.setLanguage(signupRequestDto.getLanguage());
-        user.setPreferredCategories(userPreferredCategory);
-        user.setViewedCategories(new HashMap<>()); // 시청 이력 초기화
 
-        // 초기 선호 벡터 저장
-        float[] initialVector = new float[1536];
-        user.setPreferenceVector(FloatArrayConverter.toBytes(initialVector));
+        // 초기 선호 벡터 저장 -> null
         
         this.userRepository.save(user);
         return user;
@@ -51,23 +42,10 @@ public class UserService {
         byte[] prefVector = user.getPreferenceVector();
 
         if (prefVector == null) {
-            return new float[1536];
+            return null;
         }
 
         return FloatArrayConverter.toFloatArray(prefVector);
-    }
-
-    public void updateViewedCategories(UUID userId, List<String> categories) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Map<String, Integer> viewedMap = user.getViewedCategories();
-
-        for (String category : categories) {
-            viewedMap.put(category, viewedMap.getOrDefault(category, 0) + 1);
-        }
-
-        userRepository.save(user);
     }
 
     public void updateClickLog (UUID userId, ClickLogRequestDto clickLogRequestDto){

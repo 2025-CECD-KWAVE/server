@@ -73,6 +73,83 @@ public class NewsSearchRepository {
     }
 
     /**
+     * Vector로 검색
+     */
+    public KnnResult searchByVector(float[] vector, List<String> dislikedNewsIds, int page, int size) {
+
+        try {
+            // knn + dislike filter 쿼리 Json으로 만들기
+            String queryJson = buildKnnQueryWithFilter(vector, dislikedNewsIds, page, size);
+
+            // opensearch에 요청
+            Request request = new Request("POST", "/" + INDEX_NAME + "/_search");
+            request.setJsonEntity(queryJson);
+            Response response = opensearchClient.getLowLevelClient().performRequest(request);
+
+            // response 본문 읽기
+            String responseBody = new BufferedReader(
+                    new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+
+            SearchResult sr = convertToSearchResult(responseBody);
+
+            return new KnnResult(
+                    sr.getDocuments(),
+                    sr.getScores(),
+                    sr.getTotalHits(),
+                    sr.getMaxScore()
+            );
+        }
+        catch (Exception e) {
+            log.error("KNN 벡터 검색 실패", e);
+            throw new RuntimeException("추천 검색 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    private String buildKnnQueryWithFilter(float[] vector, List<String> dislikedNewsIds, int page, int size) {
+
+        try {
+            Map<String, Object> root = new HashMap<>();
+            root.put("size", size);
+            root.put("from", page * size);
+
+            // knn part
+            Map<String, Object> knn = new HashMap<>();
+            Map<String, Object> embeddingKnn = new HashMap<>();
+            embeddingKnn.put("vector", vector);
+            embeddingKnn.put("k", Math.max(100, (page + 1) * size));
+            knn.put("embedding", embeddingKnn);
+            Map<String, Object> query = new HashMap<>();
+            query.put("knn", knn);
+
+            // Dislike Filter
+            if (dislikedNewsIds != null && !dislikedNewsIds.isEmpty()) {
+                Map<String, Object> terms = new HashMap<>();
+                terms.put("newsId", dislikedNewsIds);
+                Map<String, Object> mustNot = new HashMap<>();
+                mustNot.put("terms", terms);
+
+                // knn + bool을 어떻게 조합해 사용하는 지는 opensearch 버전에 따라 상이할 수 있음
+                Map<String, Object> boolQuery = new HashMap<>();
+                boolQuery.put("must", List.of(Map.of("knn", knn)));
+                boolQuery.put("must_not", List.of(mustNot));
+
+                query.clear();
+                query.put("bool", boolQuery);
+            }
+            root.put("query", query);
+            root.put("_source", Map.of("excludes", new String[]{"embedding", "_class"}));
+
+            return objectMapper.writeValueAsString(root);
+        }
+        catch (Exception e) {
+            log.error("추천 KNN Query 생성 실패", e);
+            throw new RuntimeException("추천 쿼리 생성 중 에러가 발생했습니다.", e);
+        }
+    }
+
+    /**
      * OpenSearch KNN 쿼리 생성
      *
      * @param queryVector 검색어의 임베딩 벡터 (1536차원 float 배열)
@@ -209,14 +286,23 @@ public class NewsSearchRepository {
     /**
      * 검색 결과를 담는 DTO
      *
-     * @param documents 검색된 뉴스 문서 리스트
-     * @param scores 각 문서의 유사도 점수 (높을수록 더 유사)
-     * @param totalHits 전체 검색 결과 개수
-     * @param maxScore 최고 유사도 점수 (정규화에 사용)
+     * documents 검색된 뉴스 문서 리스트
+     * scores 각 문서의 유사도 점수 (높을수록 더 유사)
+     * totalHits 전체 검색 결과 개수
+     * maxScore 최고 유사도 점수 (정규화에 사용)
      */
     @lombok.Getter
     @lombok.AllArgsConstructor
     public static class SearchResult {
+        private List<NewsVectorDoc> documents;
+        private List<Float> scores;
+        private long totalHits;
+        private float maxScore;
+    }
+
+    @lombok.Getter
+    @lombok.AllArgsConstructor
+    public static class KnnResult {
         private List<NewsVectorDoc> documents;
         private List<Float> scores;
         private long totalHits;

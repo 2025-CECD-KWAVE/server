@@ -24,4 +24,6 @@ public interface NewsReactionRepository extends JpaRepository<NewsReaction, Long
     List<NewsReaction> findByReactionTypeIn(List<ReactionType> types);
 
     List<NewsReaction> findByUserIdAndReactionTypeIn(UUID userId, List<ReactionType> types);
+
+    List<NewsReaction> findByUserIdAndReactionType(UUID userId, ReactionType type);
 }
