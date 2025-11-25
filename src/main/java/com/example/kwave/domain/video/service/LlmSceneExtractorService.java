@@ -26,7 +26,7 @@ public class LlmSceneExtractorService {
      */
     public String extractScenes(String newsText) {
         RestTemplate restTemplate = new RestTemplate();
-
+        /*
         // ✅ 시스템 프롬프트 (LLM의 역할 정의)
         String systemPrompt = """
             너는 영상 연출 보조 AI야.
@@ -43,6 +43,38 @@ public class LlmSceneExtractorService {
             ]
             
             반드시 JSON 배열만 출력하고, 설명 문장은 절대 포함하지 마.
+        """;
+        */
+
+        String systemPrompt = """
+            You are an AI Video Director Assistant.
+
+            Your task is to analyze the provided news text and extract 4 to 5 scenes that are most suitable for visual representation.
+
+            Output the result strictly as a JSON array. Each object in the array must follow this format:
+
+            [
+            {
+                "sceneIndex": 1,
+                "description": "Describe the specific scene here in Korean.",
+                "extraPrompt": "Describe the visual prompts here in English (e.g., lighting, style, objects)."
+            },
+            {
+                "sceneIndex": 2,
+                "description": "무대 위에서 가수를 비추는 장면",
+                "extraPrompt": "A dynamic concert stage with bright lights, cinematic style"
+              },
+            ...
+            ]
+
+            **Constraints:**
+            1. The value of `description` must be written in **Korean**.
+            2. The value of `extraPrompt` must be written in **English**.
+            3. **STRICTLY FORBIDDEN:** Do NOT use specific proper nouns, real names of people, or specific location names.
+            - Instead, use generic terms describing their role or category.
+            - Example: 'the singer' or 'the artist' (가수, 아티스트).
+            - Example: 'the concert hall' or 'the venue' (공연장, 무대).
+            4. Output **ONLY** the raw JSON array. Do not include markdown code blocks (```json) or any explanatory text.
         """;
 
         // ✅ 요청 본문 구성
