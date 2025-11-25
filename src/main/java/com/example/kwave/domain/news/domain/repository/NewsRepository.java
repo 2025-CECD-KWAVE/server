@@ -35,7 +35,7 @@ public interface NewsRepository extends JpaRepository<News, String> {
     @Query("UPDATE News n SET n.viewCount = n.viewCount + 1 WHERE n.newsId = :newsId")
     void incrementViewCount(@Param("newsId") String newsId);
 
-    Page<News> findByNewsIdNotInOrderByPublishedAtDesc(List<String> newsIds, Pageable pageable);
+    Page<News> findByNewsIdNotInOrderByEnvelopedAtDesc(List<String> newsIds, Pageable pageable);
 
-    Page<News> findAllByOrderByPublishedAtDesc(Pageable pageable);
+    Page<News> findAllByOrderByEnvelopedAtDesc(Pageable pageable);
 }

@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -49,17 +50,18 @@ public class NewsRecommendService {
                 .map(NewsReaction::getNewsId)
                 .collect(Collectors.toList());
 
-        List<String> recommendedNewsIds;
+        List<NewsRecommendResDto.IdWithScore> resultList;
 
         if (userVec == null) {
-            recommendedNewsIds = getColdStartNewsIds(dislikedNewsIds, page, size);
+            log.info("Cold Starting - userId = {}", userId);
+            resultList = getColdStartNewsIds(dislikedNewsIds, page, size);
         }
         else {
-            recommendedNewsIds = getPersonalizedNewsIds(userVec, dislikedNewsIds, page, size);
+            resultList = getPersonalizedNewsIds(userVec, dislikedNewsIds, page, size);
         }
 
         return NewsRecommendResDto.builder()
-                .newsIds(recommendedNewsIds)
+                .newsIds(resultList)
                 .page(page)
                 .size(size)
                 .build();
@@ -69,32 +71,49 @@ public class NewsRecommendService {
      * Cold Start: 선호 벡터가 없는 유저에게 최신 뉴스 추천
      * Dislike한 뉴스만 제외
      */
-    private List<String> getColdStartNewsIds(List<String> dislikeNewsIds, int page, int size) {
+    private List<NewsRecommendResDto.IdWithScore> getColdStartNewsIds(List<String> dislikeNewsIds, int page, int size) {
         Page<News> newsPage;
 
         // 싫어요 뉴스 제외 후 뉴스 최신 순으로 반환 -> cold start라 없을 수 있음
         if (dislikeNewsIds == null || dislikeNewsIds.isEmpty()) {
-            newsPage = newsRepository.findAllByOrderByPublishedAtDesc(PageRequest.of(page, size));
+            newsPage = newsRepository.findAllByOrderByEnvelopedAtDesc(PageRequest.of(page, size));
         }
         else {
             newsPage = newsRepository
-                    .findByNewsIdNotInOrderByPublishedAtDesc(dislikeNewsIds, PageRequest.of(page, size));
+                    .findByNewsIdNotInOrderByEnvelopedAtDesc(dislikeNewsIds, PageRequest.of(page, size));
         }
 
-
-
+        // Cold Start이므로 점수 X
         return newsPage.stream()
-                .map(News::getNewsId)
+                .map(news -> NewsRecommendResDto.IdWithScore.builder()
+                        .newsId(news.getNewsId())
+                        .score(0.0f)
+                        .build())
                 .collect(Collectors.toList());
     }
 
     /**
      * Personalized: 선호 벡터 + Dislike 필터를 이용한 OpenSearch KNN 추천
      */
-    private List<String> getPersonalizedNewsIds(float[] userVec, List<String> dislikedNewsIds, int page, int size) {
+    private List<NewsRecommendResDto.IdWithScore> getPersonalizedNewsIds(
+                    float[] userVec, List<String> dislikedNewsIds, int page, int size) {
+
         NewsSearchRepository.KnnResult result =
                 newsSearchRepository.searchByVector(userVec, dislikedNewsIds, page, size);
 
-        return result.getDocuments().stream().map(NewsVectorDoc::getNewsId).collect(Collectors.toList());
+        List<NewsVectorDoc> docs = result.getDocuments();
+        List<Float> scores = result.getScores();
+
+        List<NewsRecommendResDto.IdWithScore> list = new ArrayList<>();
+
+        for (int i = 0; i < docs.size(); i++) {
+            float score = (scores.size() > i) ? scores.get(i) : 0.0f;
+
+            list.add(NewsRecommendResDto.IdWithScore.builder()
+                    .newsId(docs.get(i).getNewsId())
+                    .score(score)
+                    .build());
+        }
+        return list;
     }
 }
