@@ -11,5 +11,4 @@ public class SignupRequestDto {
     private String password;
     private String nationality;
     private String language;
-    private List<String> preferredCategories;
 }

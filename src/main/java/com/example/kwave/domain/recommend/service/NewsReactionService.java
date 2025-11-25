@@ -25,6 +25,11 @@ public class NewsReactionService {
      */
     @Transactional
     public void saveReaction(NewsReactionReqDto reqDto) {
+        if (reqDto.getReactionType() == null) {
+            log.info("뉴스 리액션 타입이 정의되지 않아 JustWatch로 설정함");
+            reqDto.setReactionType(ReactionType.JustWatch);
+        }
+
         log.info("리액션 저장 - userId: {}, newsId: {}, type: {}",
                 reqDto.getUserId(), reqDto.getNewsId(), reqDto.getReactionType());
 

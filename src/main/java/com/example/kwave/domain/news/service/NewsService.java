@@ -91,15 +91,5 @@ public class NewsService {
                 .imageUrls(news.getImageUrls())
                 .build();
     }
-    public void userWatched(UUID userId, String newsId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        News news = newsRepository.findById(newsId)
-                .orElseThrow(() -> new RuntimeException("News not found"));
-
-        List<String> categories = news.getCategory();
-
-        userService.updateViewedCategories(userId, categories);
-    }
 }
