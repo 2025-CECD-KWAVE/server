@@ -48,9 +48,9 @@ public class NewsSearchRepository {
             log.info("검색 시작: '{}'", searchQuery);
             float[] queryVector = openAiService.embed(searchQuery);
 
-            // OpenSearch KNN 쿼리 생성
-            // 생성된 벡터를 사용하여 유사한 뉴스를 찾는 쿼리 생성
-            String queryJson = buildKnnQuery(queryVector, page, size);
+            // OpenSearch KNN 쿼리 생성 (수정됨: searchQuery를 함께 전달)
+            // 생성된 벡터와 텍스트 키워드를 사용하여 하이브리드 검색 쿼리 생성
+            String queryJson = buildKnnQuery(queryVector, searchQuery, page, size);
 
             // OpenSearch에 검색 요청
             Request request = new Request("POST", "/" + INDEX_NAME + "/_search");
@@ -150,36 +150,65 @@ public class NewsSearchRepository {
     }
 
     /**
-     * OpenSearch KNN 쿼리 생성
+     * OpenSearch KNN + Keyword 하이브리드 쿼리 생성
      *
-     * @param queryVector 검색어의 임베딩 벡터 (1536차원 float 배열)
+     * @param queryVector 검색어의 임베딩 벡터
+     * @param searchQuery 사용자 텍스트 검색어 (추가됨)
      * @param page 페이지 번호
      * @param size 페이지당 결과 개수
      * @return JSON 형태의 쿼리 문자열
      */
-    private String buildKnnQuery(float[] queryVector, int page, int size) {
+    private String buildKnnQuery(float[] queryVector, String searchQuery, int page, int size) {
         try {
             Map<String, Object> root = new HashMap<>();
 
             // 페이징 설정
-            root.put("size", size);                // 반환할 문서 개수
-            root.put("from", page * size);         // 건너뛸 문서 개수 (오프셋)
+            root.put("size", size);
+            root.put("from", page * size);
 
-            // KNN 쿼리 구조 생성
+            // --- 쿼리 구조 변경 시작 (Bool Query: KNN + Match) ---
             Map<String, Object> query = new HashMap<>();
+            Map<String, Object> bool = new HashMap<>();
+            List<Map<String, Object>> should = new ArrayList<>();
+
+            // KNN (Vector) 검색 부분
+            Map<String, Object> knnWrapper = new HashMap<>();
             Map<String, Object> knn = new HashMap<>();
             Map<String, Object> embeddingKnn = new HashMap<>();
+            embeddingKnn.put("vector", queryVector);
+            embeddingKnn.put("k", Math.max(100, (page + 1) * size));
+            knn.put("embedding", embeddingKnn);
+            knnWrapper.put("knn", knn);
 
-            embeddingKnn.put("vector", queryVector);              // 검색할 벡터
-            embeddingKnn.put("k", Math.max(100, (page + 1) * size));  // 찾을 최근접 이웃 개수
+            should.add(knnWrapper); // Vector 검색 추가
 
-            knn.put("embedding", embeddingKnn);  // "embedding" 필드에서 검색
-            query.put("knn", knn);
+            // Keyword (Multi-match) 검색 부분
+            // 검색어가 있을 때만 키워드 매칭을 추가하여 점수를 보정합니다.
+            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+                Map<String, Object> matchWrapper = new HashMap<>();
+                Map<String, Object> multiMatch = new HashMap<>();
+
+                multiMatch.put("query", searchQuery);
+
+                // Summary에 있으면 점수 3배, Content에 있으면 1배
+                multiMatch.put("fields", List.of("newsSummary^3.0", "newsContent^0.3"));
+
+                // phrase_prefix: "~~"로 시작하는 단어
+                multiMatch.put("type", "phrase_prefix");
+
+                matchWrapper.put("multi_match", multiMatch);
+                should.add(matchWrapper); // Keyword 검색 추가
+            }
+
+            // should 조건 중 하나라도 만족하면 결과 반환 (Vector OR Keyword)
+            bool.put("should", should);
+            bool.put("minimum_should_match", 1);
+
+            query.put("bool", bool);
             root.put("query", query);
+            // --- 쿼리 구조 변경 끝 ---
 
             // 응답에서 제외할 필드 설정
-            // embedding: 크기가 크고 클라이언트에 불필요 (네트워크 대역폭 절약)
-            // _class: Spring Data의 내부 메타데이터로 불필요
             root.put("_source", Map.of("excludes", new String[]{"embedding", "_class"}));
 
             return objectMapper.writeValueAsString(root);
