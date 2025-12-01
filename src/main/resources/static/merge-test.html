@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>영상 병합 + 배경음악 테스트</title>
+</head>
+<body>
+<h1>영상 3개 병합 + 배경음악 삽입</h1>
+
+<!-- 배경음악 없이 단순 병합 -->
+<section>
+    <h2>① 배경음악 없이 병합</h2>
+    <form action="/video/merge" method="post" enctype="multipart/form-data">
+        <p>영상 1: <input type="file" name="files" accept="video/*" required></p>
+        <p>영상 2: <input type="file" name="files" accept="video/*" required></p>
+        <p>영상 3: <input type="file" name="files" accept="video/*" required></p>
+        <button type="submit">병합하고 다운로드</button>
+    </form>
+</section>
+
+<hr>
+
+<!-- 배경음악 포함 병합 -->
+<section>
+    <h2>② 배경음악과 함께 병합 (영상 길이에 맞춰 자동 컷)</h2>
+    <form action="/video/merge-with-bgm" method="post" enctype="multipart/form-data">
+        <p>영상 1: <input type="file" name="files" accept="video/*" required></p>
+        <p>영상 2: <input type="file" name="files" accept="video/*" required></p>
+        <p>영상 3: <input type="file" name="files" accept="video/*" required></p>
+        <p>배경음악: <input type="file" name="bgm" accept="audio/*" required></p>
+        <button type="submit">배경음악 넣고 병합 + 다운로드</button>
+    </form>
+</section>
+
+<p style="margin-top:24px;">
+    업로드 후 서버에서 FFmpeg로 3개 영상을 이어 붙이고,<br>
+    (②의 경우) 배경음악은 영상 길이에 맞춰 자동으로 잘라 삽입한 뒤,<br>
+    최종 mp4 파일을 바로 다운로드합니다.
+</p>
+</body>
+</html>

@@ -47,34 +47,49 @@ public class LlmSceneExtractorService {
         */
 
         String systemPrompt = """
-            You are an AI Video Director Assistant.
-
-            Your task is to analyze the provided news text and extract 4 to 5 scenes that are most suitable for visual representation.
-
-            Output the result strictly as a JSON array. Each object in the array must follow this format:
-
-            [
-            {
-                "sceneIndex": 1,
-                "description": "Describe the specific scene here in Korean.",
-                "extraPrompt": "Describe the visual prompts here in English (e.g., lighting, style, objects)."
-            },
-            {
-                "sceneIndex": 2,
-                "description": "무대 위에서 가수를 비추는 장면",
-                "extraPrompt": "A dynamic concert stage with bright lights, cinematic style"
-              },
-            ...
-            ]
-
-            **Constraints:**
-            1. The value of `description` must be written in **Korean**.
-            2. The value of `extraPrompt` must be written in **English**.
-            3. **STRICTLY FORBIDDEN:** Do NOT use specific proper nouns, real names of people, or specific location names.
-            - Instead, use generic terms describing their role or category.
-            - Example: 'the singer' or 'the artist' (가수, 아티스트).
-            - Example: 'the concert hall' or 'the venue' (공연장, 무대).
-            4. Output **ONLY** the raw JSON array. Do not include markdown code blocks (```json) or any explanatory text.
+                You are an AI Video Director Assistant.
+                
+                Your task is to analyze the provided news text and extract exactly 5 scenes that are most suitable for short-form visual representation.
+                
+                Each scene prompt must be designed as:
+                - a 5-second clip,
+                - framed specifically for a 9:16 vertical (shorts) video format.
+                
+                Output the result strictly as a JSON array. Each object in the array must follow this format:
+                
+                [
+                  {
+                    "sceneIndex": 1,
+                    "description": "Describe the specific scene here in Korean.",
+                    "extraPrompt": "Describe the visual prompts here in English (must explicitly mention 9:16 vertical framing and short 5-second composition)."
+                  },
+                  ...
+                ]
+                
+                Constraints:
+                1. The value of `description` must be written in Korean.
+                2. The value of `extraPrompt` must be written in English and must clearly instruct a 5-second, 9:16 vertical video composition.
+                
+                3. EXTREME RESTRICTIONS ON PEOPLE:
+                   - Do NOT describe any specific individual.
+                   - Do NOT describe identifiable people (e.g., singer, performer, dancer, politician, reporter).
+                   - Do NOT mention any human actions, poses, gestures, or facial expressions.
+                   - Only anonymous, distant groups such as '군중', '사람들', '관객' may appear, and ONLY as background silhouettes.
+                   - No recognizable humans, no single-person focus.
+                
+                4. STRICT BAN ON PROPER NOUNS:
+                   - No real names, celebrity names, organization names, or location names.
+                   - Use only generic scene descriptions (e.g., "도시 거리", "무대", "가상 공간").
+                
+                5. SCENE FOCUS RULE:
+                   - Scenes must focus on environments, landscapes, objects, atmospheres, or symbolic visuals.
+                   - Not people.
+                
+                6. FORMAT REQUIREMENTS:
+                   - Each scene must be visually strong, simple, and optimized for a short 5-second 9:16 vertical video shot.
+                   - No markdown, no explanations. Output ONLY the JSON array.
+                
+                Generate exactly 5 scenes.
         """;
 
         // ✅ 요청 본문 구성
