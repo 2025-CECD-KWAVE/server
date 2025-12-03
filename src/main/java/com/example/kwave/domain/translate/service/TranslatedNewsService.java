@@ -1,6 +1,5 @@
 package com.example.kwave.domain.translate.service;
 
-import com.example.kwave.domain.news.domain.News;
 import com.example.kwave.domain.news.domain.repository.NewsRepository;
 import com.example.kwave.domain.news.dto.NewsDetailDTO;
 import com.example.kwave.domain.news.dto.NewsSummaryDTO;
@@ -11,7 +10,6 @@ import com.example.kwave.domain.translate.domain.repository.TranslatedNewsDetail
 import com.example.kwave.domain.translate.domain.repository.TranslatedNewsSummaryRepository;
 import com.example.kwave.domain.translate.dto.response.TranslateResponseDto;
 import com.example.kwave.domain.translate.dto.response.Translation;
-import com.example.kwave.global.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -22,7 +20,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
