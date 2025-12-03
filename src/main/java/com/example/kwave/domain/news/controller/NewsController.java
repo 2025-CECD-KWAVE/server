@@ -56,13 +56,6 @@ public class NewsController {
         }
     }
 
-    @PostMapping("/{newsId}/watch")
-    @Operation(summary = "사용자가 열람한 뉴스 이력 저장", description = "뉴스 추천을 위해 사용자가 뉴스를 조회한 경우, 해당 뉴스 id를 저장합니다")
-    public ResponseEntity<String> watchNews(@RequestParam UUID userId, @PathVariable String newsId) {
-        newsService.userWatched(userId, newsId);
-        return ResponseEntity.ok("열람한 뉴스 카테고리 업데이트");
-    }
-
     @GetMapping("/test-scheduler")
     @Operation(summary = "스케줄러 동작 (테스트)", description = "뉴스 저장 스케줄러를 동작시킵니다")
     public ResponseEntity<String> testScheduler() {

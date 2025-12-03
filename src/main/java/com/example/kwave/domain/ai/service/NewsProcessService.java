@@ -3,7 +3,11 @@ package com.example.kwave.domain.ai.service;
 import com.example.kwave.domain.ai.domain.NewsVectorDoc;
 import com.example.kwave.domain.ai.domain.repository.NewsVectorRepository;
 import com.example.kwave.domain.news.domain.News;
-import com.example.kwave.domain.news.repository.NewsRepository;
+<<<<<<< HEAD
+import com.example.kwave.domain.news.domain.repository.NewsRepository;
+=======
+import com.example.kwave.domain.news.service.NewsEmbeddingService;
+>>>>>>> 97dedf4d7283d6cb5f7dc033732c06ceef70896d
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,7 @@ public class NewsProcessService {
     private final OpenAiService openAiService;
     private final NewsRepository newsRepository;
     private final NewsVectorRepository newsVecRepository;
+    private final NewsEmbeddingService newsEmbeddingService;
 
     /**
      * 오늘 수집된 뉴스 중 summary가 null인 것만 처리
@@ -77,6 +82,10 @@ public class NewsProcessService {
         // 임베딩 벡터 생성
         float[] embedding = openAiService.embed(summary);
         log.info("임베딩 완료 - newsId: {}, 차원: {}", news.getNewsId(), embedding.length);
+
+        // NewsEmbedding 테이블에 저장
+        newsEmbeddingService.saveEmbedding(news.getNewsId(), embedding);
+        log.info("NewsEmbedding 저장 완료 - newsId: {}", news.getNewsId());
 
         // OpenSearch에 저장
         NewsVectorDoc doc = NewsVectorDoc.builder()

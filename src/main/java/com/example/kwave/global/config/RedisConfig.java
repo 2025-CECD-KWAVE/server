@@ -1,5 +1,6 @@
 package com.example.kwave.global.config;
 
+import com.example.kwave.global.util.ByteArrayRedisSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,7 @@ import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
@@ -34,5 +36,26 @@ public class RedisConfig {
         RedisTemplate<?, ?> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         return redisTemplate;
+    }
+
+    /**
+     * preference_vector 전용 RedisTemplate
+     * key: userId, value: byte[]
+     * @param redisConnectionFactory
+     * @return
+     */
+    @Bean(name = "userVectorRedisTemplate")
+    public RedisTemplate<String, byte[]> userVectorRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, byte[]> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+
+        // key는 문자열, value는 byte[]
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new ByteArrayRedisSerializer());
+
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new ByteArrayRedisSerializer());
+
+        return template;
     }
 }

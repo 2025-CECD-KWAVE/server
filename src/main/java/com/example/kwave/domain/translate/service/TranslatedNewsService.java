@@ -1,6 +1,6 @@
 package com.example.kwave.domain.translate.service;
 
-import com.example.kwave.domain.news.repository.NewsRepository;
+import com.example.kwave.domain.news.domain.repository.NewsRepository;
 import com.example.kwave.domain.news.dto.NewsDetailDTO;
 import com.example.kwave.domain.news.dto.NewsSummaryDTO;
 import com.example.kwave.domain.translate.domain.TargetLangCode;

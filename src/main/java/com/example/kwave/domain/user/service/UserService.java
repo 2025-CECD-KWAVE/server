@@ -4,6 +4,7 @@ import com.example.kwave.domain.user.domain.User;
 import com.example.kwave.domain.user.domain.repository.UserRepository;
 import com.example.kwave.domain.user.dto.request.ClickLogRequestDto;
 import com.example.kwave.domain.user.dto.request.SignupRequestDto;
+import com.example.kwave.global.util.FloatArrayConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,6 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public User createUser(SignupRequestDto signupRequestDto) {
-        // 회원가입 시 선호하는 카테고리에 가중치 3 부여
-        Map<String, Integer> userPreferredCategory = new HashMap<>();
-        for (String category : signupRequestDto.getPreferredCategories()) {
-            userPreferredCategory.put(category, 3);
-        }
 
         User user = new User();
         user.setUserId(UUID.randomUUID());
@@ -31,24 +27,25 @@ public class UserService {
         user.setPassword(bCryptPasswordEncoder.encode(signupRequestDto.getPassword()));
         user.setNationality(signupRequestDto.getNationality());
         user.setLanguage(signupRequestDto.getLanguage());
-        user.setPreferredCategories(userPreferredCategory);
-        user.setViewedCategories(new HashMap<>()); // 시청 이력 초기화
+
+        // 초기 선호 벡터 저장 -> null
         
         this.userRepository.save(user);
         return user;
     }
 
-    public void updateViewedCategories(UUID userId, List<String> categories) {
+    // 벡터 불러오기 (추천할 때, Redis miss 시)
+    public float[] loadUserPreferenceVector(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Map<String, Integer> viewedMap = user.getViewedCategories();
+        byte[] prefVector = user.getPreferenceVector();
 
-        for (String category : categories) {
-            viewedMap.put(category, viewedMap.getOrDefault(category, 0) + 1);
+        if (prefVector == null) {
+            return null;
         }
 
-        userRepository.save(user);
+        return FloatArrayConverter.toFloatArray(prefVector);
     }
 
     public void updateClickLog (UUID userId, ClickLogRequestDto clickLogRequestDto){

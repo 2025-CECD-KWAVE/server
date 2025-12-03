@@ -1,7 +1,6 @@
 package com.example.kwave.domain.video.service;
 
-import com.example.kwave.domain.news.domain.News;
-import com.example.kwave.domain.news.repository.NewsRepository;
+import com.example.kwave.domain.news.domain.repository.NewsRepository;
 import com.example.kwave.domain.video.domain.VideoScene;
 import com.example.kwave.domain.video.dto.SceneDto;
 import com.example.kwave.domain.video.repository.VideoSceneRepository;
@@ -9,7 +8,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import com.example.kwave.domain.video.service.LlmSceneExtractorService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

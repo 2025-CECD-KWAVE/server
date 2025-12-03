@@ -1,7 +1,7 @@
 package com.example.kwave.domain.recommend.service;
 
 import com.example.kwave.domain.news.domain.News;
-import com.example.kwave.domain.news.repository.NewsRepository;
+import com.example.kwave.domain.news.domain.repository.NewsRepository;
 import com.example.kwave.domain.recommend.domain.NewsViewHistory;
 import com.example.kwave.domain.recommend.domain.repository.NewsViewHistoryRepository;
 import com.example.kwave.domain.recommend.dto.NewsViewReqDto;

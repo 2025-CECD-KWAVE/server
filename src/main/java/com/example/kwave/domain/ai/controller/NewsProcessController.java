@@ -63,26 +63,6 @@ public class NewsProcessController {
     }
 
     /**
-     * OpenSearch Connection Test
-     */
-    @GetMapping("/test-connection")
-    public Map<String, Object> testConnection() {
-        try {
-            return Map.of(
-                    "success", true,
-                    "message", "OpenSearch 연결 성공"
-            );
-        }
-        catch (Exception e) {
-            log.error("OpenSearch 연결 실패", e);
-            return Map.of(
-                    "success", false,
-                    "error", e.getMessage()
-            );
-        }
-    }
-
-    /**
      * 날짜 무관 전체 미처리 뉴스 배치 수행
      */
     @PostMapping("/batch/all-unprocessed")

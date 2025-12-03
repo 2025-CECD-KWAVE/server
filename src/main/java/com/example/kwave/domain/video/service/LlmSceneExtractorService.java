@@ -1,7 +1,7 @@
 package com.example.kwave.domain.video.service;
 
 import com.example.kwave.domain.news.domain.News;
-import com.example.kwave.domain.news.repository.NewsRepository;
+import com.example.kwave.domain.news.domain.repository.NewsRepository;
 import com.example.kwave.global.config.OpenAiConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,33 +25,55 @@ public class LlmSceneExtractorService {
     public String extractScenesWithImages(String newsId) {
         RestTemplate restTemplate = new RestTemplate();
 
-        // ✅ 뉴스 조회
         News news = newsRepository.findByNewsId(newsId)
                 .orElseThrow(() -> new RuntimeException("뉴스를 찾을 수 없습니다."));
         String newsText = news.getSummary() != null ? news.getSummary() : news.getContent();
         List<String> imageUrls = news.getImageUrls();
 
-        // ✅ 시스템 프롬프트 정의
         String systemPrompt = """
-            너는 영상 연출 보조 AI야.
-            아래는 뉴스 본문과 기사에 포함된 이미지 목록이야.
-            기사 내용을 시각적으로 표현하기 좋은 장면 4~5개를 만들어.
-            
-            각 장면은 JSON 배열로 반환하고, 형식은 아래와 같아:
-            [
-              {
-                "sceneIndex": 1,
-                "description": "무대 위에서 가수를 비추는 장면",
-                "extraPrompt": "A dynamic concert stage with bright lights, cinematic style",
-                "matchedImageUrl": "https://cdn.news.com/image_1.jpg"
-              },
-              ...
-            ]
-
-            조건:
-            1. 이미지가 특정 장면에 어울린다면 matchedImageUrl에 URL을 넣어.
-            2. 어울리는 이미지가 없다면 반드시 null을 넣어.
-            3. JSON 배열만 출력하고, 부가설명은 포함하지 마.
+                You are an AI Video Director Assistant.
+                
+                Your task is to analyze the provided news text and extract exactly 5 scenes that are most suitable for short-form visual representation.
+                
+                Each scene prompt must be designed as:
+                - a 5-second clip,
+                - framed specifically for a 9:16 vertical (shorts) video format.
+                
+                Output the result strictly as a JSON array. Each object in the array must follow this format:
+                
+                [
+                  {
+                    "sceneIndex": 1,
+                    "description": "Describe the specific scene here in Korean.",
+                    "extraPrompt": "Describe the visual prompts here in English (must explicitly mention 9:16 vertical framing and short 5-second composition)."
+                  },
+                  ...
+                ]
+                
+                Constraints:
+                1. The value of `description` must be written in Korean.
+                2. The value of `extraPrompt` must be written in English and must clearly instruct a 5-second, 9:16 vertical video composition.
+                
+                3. EXTREME RESTRICTIONS ON PEOPLE:
+                   - Do NOT describe any specific individual.
+                   - Do NOT describe identifiable people (e.g., singer, performer, dancer, politician, reporter).
+                   - Do NOT mention any human actions, poses, gestures, or facial expressions.
+                   - Only anonymous, distant groups such as '군중', '사람들', '관객' may appear, and ONLY as background silhouettes.
+                   - No recognizable humans, no single-person focus.
+                
+                4. STRICT BAN ON PROPER NOUNS:
+                   - No real names, celebrity names, organization names, or location names.
+                   - Use only generic scene descriptions (e.g., "도시 거리", "무대", "가상 공간").
+                
+                5. SCENE FOCUS RULE:
+                   - Scenes must focus on environments, landscapes, objects, atmospheres, or symbolic visuals.
+                   - Not people.
+                
+                6. FORMAT REQUIREMENTS:
+                   - Each scene must be visually strong, simple, and optimized for a short 5-second 9:16 vertical video shot.
+                   - No markdown, no explanations. Output ONLY the JSON array.
+                
+                Generate exactly 5 scenes.
         """;
 
         Map<String, Object> body = Map.of(
