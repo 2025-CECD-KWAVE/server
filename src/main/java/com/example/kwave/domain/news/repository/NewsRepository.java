@@ -1,4 +1,4 @@
-package com.example.kwave.domain.news.domain.repository;
+package com.example.kwave.domain.news.repository;
 
 import com.example.kwave.domain.news.domain.News;
 import org.springframework.data.domain.Page;

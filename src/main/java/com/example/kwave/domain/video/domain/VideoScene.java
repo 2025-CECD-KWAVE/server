@@ -20,4 +20,6 @@ public class VideoScene {
     @Column(length = 1000)
     private String videoUrl;        // Runway 영상 결과 URL
     private LocalDateTime createdAt;
+    @Column(name = "matched_image_url")
+    private String matchedImageUrl;  // 이미지가 매핑되지 않으면 null
 }

@@ -1,7 +1,7 @@
 package com.example.kwave.domain.news.service;
 
 import com.example.kwave.domain.news.domain.News;
-import com.example.kwave.domain.news.domain.repository.NewsRepository;
+import com.example.kwave.domain.news.repository.NewsRepository;
 import com.example.kwave.domain.news.dto.NewsDTO;
 import com.example.kwave.domain.news.dto.NewsDetailDTO;
 import com.example.kwave.domain.news.dto.NewsSummaryDTO;
@@ -12,9 +12,7 @@ import com.example.kwave.domain.user.service.UserService;
 import com.example.kwave.domain.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;

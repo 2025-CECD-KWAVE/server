@@ -1,7 +1,7 @@
 package com.example.kwave.domain.user.service;
 
 import com.example.kwave.domain.news.domain.News;
-import com.example.kwave.domain.news.domain.repository.NewsRepository;
+import com.example.kwave.domain.news.repository.NewsRepository;
 import com.example.kwave.domain.news.dto.NewsSummaryDTO;
 import com.example.kwave.domain.user.domain.User;
 import com.example.kwave.domain.user.domain.repository.UserRepository;
