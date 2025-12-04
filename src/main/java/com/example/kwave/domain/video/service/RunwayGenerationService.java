@@ -44,7 +44,7 @@ public class RunwayGenerationService {
                 "promptImage", imageUrl,
                 "promptText", prompt,
                 "ratio", "720:1280",
-                "duration", 4
+                "duration", 5
         ));
     }
 
