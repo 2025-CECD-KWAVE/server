@@ -3,11 +3,8 @@ package com.example.kwave.domain.ai.service;
 import com.example.kwave.domain.ai.domain.NewsVectorDoc;
 import com.example.kwave.domain.ai.domain.repository.NewsVectorRepository;
 import com.example.kwave.domain.news.domain.News;
-<<<<<<< HEAD
 import com.example.kwave.domain.news.domain.repository.NewsRepository;
-=======
 import com.example.kwave.domain.news.service.NewsEmbeddingService;
->>>>>>> 97dedf4d7283d6cb5f7dc033732c06ceef70896d
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

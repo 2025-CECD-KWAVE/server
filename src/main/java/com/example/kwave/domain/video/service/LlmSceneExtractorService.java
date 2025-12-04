@@ -46,9 +46,15 @@ public class LlmSceneExtractorService {
                     "sceneIndex": 1,
                     "description": "Describe the specific scene here in Korean.",
                     "extraPrompt": "Describe the visual prompts here in English (must explicitly mention 9:16 vertical framing and short 5-second composition)."
+                    "matchedImageUrl": "https://cdn.news.com/image_1.jpg"
                   },
                   ...
                 ]
+                
+                Matching URL Constraints:       
+                1. If an image fits the scene, put its URL in matchedImageUrl.
+                2. If no suitable image exists, you must put null.
+                3. Output only the JSON array and include no additional explanation.
                 
                 Constraints:
                 1. The value of `description` must be written in Korean.
