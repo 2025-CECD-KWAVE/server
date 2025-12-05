@@ -7,20 +7,16 @@ import com.example.kwave.domain.news.dto.NewsDetailDTO;
 import com.example.kwave.domain.news.dto.NewsSummaryDTO;
 import com.example.kwave.domain.news.external.NewsApiClient;
 import com.example.kwave.global.util.TimeUtils;
-import com.example.kwave.domain.user.domain.User;
 import com.example.kwave.domain.user.service.UserService;
 import com.example.kwave.domain.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -55,9 +51,6 @@ public class NewsService {
     public List<NewsSummaryDTO> getNewsSummaries(Pageable pageable) {
         Page<News> page = newsRepository.findAll(pageable);
         return page.getContent().stream().map(news -> {
-            String summary = news.getContent() != null && news.getContent().length() > 100
-                    ? news.getContent().substring(0, 100) + "..."
-                    : news.getContent();
 
             String timeAgo = TimeUtils.getTimeAgo(
                     news.getPublishedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
@@ -70,11 +63,32 @@ public class NewsService {
             return NewsSummaryDTO.builder()
                     .newsId(news.getNewsId())
                     .title(news.getTitle())
-                    .summary(summary)
+                    .summary(news.getSummary())
                     .timeAgo(timeAgo)
-                    .thumbnailUrl(thumbnailUrl) // ✅
+                    .thumbnailUrl(thumbnailUrl)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    public NewsSummaryDTO getNewsSummaryById(String newsId) {
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new RuntimeException("News not found: " + newsId));
+
+        String timeAgo = TimeUtils.getTimeAgo(
+                news.getPublishedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+        );
+
+        String thumbnailUrl = (news.getImageUrls() != null && !news.getImageUrls().isEmpty())
+                ? news.getImageUrls().get(0)
+                : null;
+
+        return NewsSummaryDTO.builder()
+                .newsId(news.getNewsId())
+                .title(news.getTitle())
+                .summary(news.getSummary())
+                .timeAgo(timeAgo)
+                .thumbnailUrl(thumbnailUrl)
+                .build();
     }
 
     public NewsDetailDTO getNewsDetail(String newsId) {
@@ -91,15 +105,5 @@ public class NewsService {
                 .imageUrls(news.getImageUrls())
                 .build();
     }
-    public void userWatched(UUID userId, String newsId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        News news = newsRepository.findById(newsId)
-                .orElseThrow(() -> new RuntimeException("News not found"));
-
-        List<String> categories = news.getCategory();
-
-        userService.updateViewedCategories(userId, categories);
-    }
 }

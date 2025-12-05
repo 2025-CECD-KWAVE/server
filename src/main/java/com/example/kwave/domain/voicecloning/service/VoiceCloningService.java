@@ -1,5 +1,29 @@
 package com.example.kwave.domain.voicecloning.service;
 
+import com.example.kwave.domain.voicecloning.external.ElevenLabsApiClient;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class VoiceCloningService {
+
+    private final ElevenLabsApiClient elevenLabsApiClient;
+
+    public byte[] VoiceCloning(String voiceId, String textToSpeak) {
+        
+        final String modelId = "eleven_multilingual_v2";
+        final String outputFormat = "mp3_44100_128";
+        
+        byte[] audioData = elevenLabsApiClient.fetchVoiceCloning(
+            voiceId, textToSpeak, modelId, outputFormat
+        );
+
+        return audioData;
+    }
+}
+
+/*
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,3 +69,4 @@ public class VoiceCloningService {
     }
 
 }
+*/
