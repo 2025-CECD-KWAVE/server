@@ -68,8 +68,10 @@ public class FFMPEGService {
                 ? "null"
                 : subtitleFilter;
 
+        String scalePad = "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2";
+
         String filter =
-                "[0:v]" + videoFilter + "[v];" +
+                "[0:v]" + scalePad + "," + videoFilter + "[v];" +
                         "[1:a]volume=1.3[a_tts];" +
                         "[2:a]volume=0.2[a_bgm];" +
                         "[a_tts][a_bgm]amix=inputs=2:duration=longest[a]";
@@ -233,6 +235,7 @@ public class FFMPEGService {
                         .replace(":", "\\:")
                         .replace("'", "\\'")
                         .replace("\"", "\\\"")
+                        .replace("'", "")
                         .replace(",", "\\,");
 
                 int yOffset = 100 + (totalHeight - (i * (fontSize + lineSpacing)));
