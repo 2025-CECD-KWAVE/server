@@ -108,7 +108,7 @@ public class NewsService {
                 .build();
     }
 
-    public List<NewsSummaryDTO> getNewsSummariesByIds(List<Long> newsIds) {
+    public List<NewsSummaryDTO> getNewsSummariesByIds(List<String> newsIds) {
         List<News> newsList = newsRepository.findByNewsIdIn(newsIds);
 
         return newsList.stream().map(news -> {
