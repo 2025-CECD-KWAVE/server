@@ -31,6 +31,6 @@ public class NewsViewHistory {
     @Column(name = "news_id")
     private String newsId;
 
-    @Column(name = "viwed_at")
+    @Column(name = "viewed_at")
     private OffsetDateTime viewedAt;
 }
