@@ -66,6 +66,7 @@ public class NewsService {
                     .summary(news.getSummary())
                     .timeAgo(timeAgo)
                     .thumbnailUrl(thumbnailUrl)
+                    .provider(news.getProvider())
                     .build();
         }).collect(Collectors.toList());
     }
@@ -88,6 +89,7 @@ public class NewsService {
                 .summary(news.getSummary())
                 .timeAgo(timeAgo)
                 .thumbnailUrl(thumbnailUrl)
+                .provider(news.getProvider())
                 .build();
     }
 
@@ -124,6 +126,7 @@ public class NewsService {
                     .summary(news.getSummary())
                     .timeAgo(timeAgo)
                     .thumbnailUrl(thumbnailUrl)
+                    .provider(news.getProvider())
                     .build();
         }).collect(Collectors.toList());
     }

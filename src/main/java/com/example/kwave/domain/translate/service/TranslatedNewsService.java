@@ -49,12 +49,13 @@ public class TranslatedNewsService {
             Optional<TranslatedNewsSummary> cached = translatedNewsSummaryRepository.findById(redisKey);
 
             if (cached.isPresent()) {
-                translatedNewsSummaryList.add(cached.get().toNewsSummaryDto(dto.getThumbnailUrl()));
+                translatedNewsSummaryList.add(cached.get().toNewsSummaryDto(dto.getThumbnailUrl(), dto.getProvider()));
             } else {
                 // 번역 대상 텍스트 누적
                 textsToTranslate.add(dto.getTitle());
                 textsToTranslate.add(dto.getSummary());
                 textsToTranslate.add(dto.getTimeAgo());
+                textsToTranslate.add(dto.getProvider());
                 itemsToTranslate.add(dto);
             }
         }
@@ -66,7 +67,7 @@ public class TranslatedNewsService {
 
             // 3. 결과를 3줄 단위로 끊어서 각각 뉴스에 매핑
             for (int i = 0; i < itemsToTranslate.size(); i++) {
-                int baseIdx = i * 3;
+                int baseIdx = i * 4;
 
                 NewsSummaryDTO original = itemsToTranslate.get(i);
                 String redisKey = original.getNewsId() + ":" + targetLangCode + ":Summary";
@@ -79,7 +80,7 @@ public class TranslatedNewsService {
                         .build();
 
                 translatedNewsSummaryRepository.save(translated);
-                translatedNewsSummaryList.add(translated.toNewsSummaryDto(original.getThumbnailUrl()));
+                translatedNewsSummaryList.add(translated.toNewsSummaryDto(original.getThumbnailUrl(), original.getProvider()));
             }
         }
 
