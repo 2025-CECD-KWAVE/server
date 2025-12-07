@@ -35,8 +35,8 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build Docker image
-      run: docker build -t gzhan0226/kwave:latest .
-
+      run: docker build --no-cache -t gzhan0226/kwave:latest .
+      
     - name: Push Docker image
       run: docker push gzhan0226/kwave:latest
 
