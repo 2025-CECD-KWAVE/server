@@ -38,4 +38,6 @@ public interface NewsRepository extends JpaRepository<News, String> {
     Page<News> findByNewsIdNotInOrderByEnvelopedAtDesc(List<String> newsIds, Pageable pageable);
 
     Page<News> findAllByOrderByEnvelopedAtDesc(Pageable pageable);
+
+    List<News> findByNewsIdIn(List<Long> newsIds);
 }

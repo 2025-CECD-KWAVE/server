@@ -106,4 +106,25 @@ public class NewsService {
                 .build();
     }
 
+    public List<NewsSummaryDTO> getNewsSummariesByIds(List<Long> newsIds) {
+        List<News> newsList = newsRepository.findByNewsIdIn(newsIds);
+
+        return newsList.stream().map(news -> {
+            String timeAgo = TimeUtils.getTimeAgo(
+                    news.getPublishedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+            );
+
+            String thumbnailUrl = (news.getImageUrls() != null && !news.getImageUrls().isEmpty())
+                    ? news.getImageUrls().get(0)
+                    : null;
+
+            return NewsSummaryDTO.builder()
+                    .newsId(news.getNewsId())
+                    .title(news.getTitle())
+                    .summary(news.getSummary())
+                    .timeAgo(timeAgo)
+                    .thumbnailUrl(thumbnailUrl)
+                    .build();
+        }).collect(Collectors.toList());
+    }
 }
