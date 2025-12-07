@@ -1,18 +1,15 @@
 package com.example.kwave.domain.news.controller;
 
 import com.example.kwave.domain.news.domain.News;
-import com.example.kwave.domain.news.dto.NewsDTO;
+import com.example.kwave.domain.news.dto.GetNewsListRequestDto;
 import com.example.kwave.domain.news.dto.NewsDetailDTO;
 import com.example.kwave.domain.news.dto.NewsSummaryDTO;
 import com.example.kwave.domain.news.service.NewsService;
 import com.example.kwave.domain.translate.domain.TargetLangCode;
-import com.example.kwave.domain.translate.domain.TranslatedNewsSummary;
 import com.example.kwave.domain.translate.service.TranslatedNewsService;
-import com.example.kwave.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,7 +22,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -106,6 +102,24 @@ public class NewsController {
         }
         else {
             return ResponseEntity.ok(translatedNewsService.getOrTranslateDetail(newsDetailDTO, targetLangCode));
+        }
+    }
+
+    @PostMapping("/list")
+    @Operation(summary = "뉴스 ID 리스트로 뉴스 조회", description = "뉴스 ID 리스트를 받아 여러 건의 뉴스 조회")
+    public ResponseEntity<List<NewsSummaryDTO>> getNewsListByIds(
+            @RequestBody GetNewsListRequestDto request,
+            Locale locale
+    ) {
+
+        List<NewsSummaryDTO> newsList = newsService.getNewsSummariesByIds(request.ids());
+
+        TargetLangCode targetLangCode = translatedNewsService.convertLocaleToTargetLangCode(locale);
+
+        if (targetLangCode == TargetLangCode.KO) {
+            return ResponseEntity.ok(newsList);
+        } else {
+            return ResponseEntity.ok(translatedNewsService.getOrTranslateSummary(newsList, targetLangCode));
         }
     }
 }
