@@ -1,6 +1,7 @@
 package com.example.kwave.domain.search.service;
 
 import com.example.kwave.domain.ai.domain.NewsVectorDoc;
+import com.example.kwave.domain.ai.service.OpenAiService;
 import com.example.kwave.domain.search.dto.request.NewsSearchReqDto;
 import com.example.kwave.domain.search.dto.response.NewsSearchResDto;
 import com.example.kwave.domain.search.dto.response.SearchingResultDto;
@@ -18,17 +19,23 @@ import java.util.List;
 public class NewsSearchService {
 
     private final NewsSearchRepository newsSearchRepository;
+    private final OpenAiService openAiService;
 
     /**
      * KNN 벡터 기반 뉴스 검색
      */
     public NewsSearchResDto searchNews(NewsSearchReqDto newsSearchReqDto) {
-        log.info("뉴스 검색: query={}", newsSearchReqDto.getQuery());
+        String originalQuery = newsSearchReqDto.getQuery();
+        log.info("뉴스 검색 요청: query='{}'", originalQuery);
 
         validateSearchRequest(newsSearchReqDto);
 
+        // 검색어 번역 (외국어 -> 한국어)
+        String translatedQuery = openAiService.translateSearchQuery(originalQuery);
+
+        // Repository 호출 (번역된 쿼리 전달)
         NewsSearchRepository.SearchResult searchResult = newsSearchRepository.searchNews(
-                newsSearchReqDto.getQuery(),
+                translatedQuery,
                 newsSearchReqDto.getPage(),
                 newsSearchReqDto.getPageSize()
         );
